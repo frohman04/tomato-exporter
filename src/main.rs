@@ -1,7 +1,11 @@
+extern crate actix_web;
+#[macro_use]
+extern crate log;
 extern crate regex;
 extern crate reqwest;
 extern crate serde_json;
 extern crate serde_yaml;
+extern crate simplelog;
 
 #[cfg(test)]
 #[macro_use]
@@ -10,9 +14,19 @@ extern crate maplit;
 mod bandwidth;
 mod config;
 
-fn main() {
+use actix_web::{App, HttpServer};
+use simplelog::{CombinedLogger, Config, LevelFilter, TermLogger, TerminalMode};
+
+#[actix_rt::main]
+async fn main() -> std::io::Result<()> {
+    CombinedLogger::init(vec![TermLogger::new(
+        LevelFilter::Info,
+        Config::default(),
+        TerminalMode::Stderr,
+    )])
+    .unwrap();
+
     let conf = config::load_conf();
-    println!("{:?}", conf);
     let client = conf
         .modules
         .mod_bandwidth
@@ -25,5 +39,9 @@ fn main() {
             )
         })
         .expect("Must define mod_bandwidth configuration");
-    println!("{:?}", client.get_bandwidth());
+
+    HttpServer::new(|| App::new())
+        .bind(format!("{}:{}", conf.ip, conf.port))?
+        .run()
+        .await
 }
