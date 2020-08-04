@@ -4,6 +4,7 @@ use regex::Regex;
 use reqwest::{Client, ClientBuilder};
 use serde::{de::Error, Deserialize, Deserializer};
 
+#[derive(Clone)]
 pub struct BandwidthClient {
     url: String,
     admin_username: String,
