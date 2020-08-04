@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use regex::Regex;
-use reqwest::blocking::{Client, ClientBuilder};
+use reqwest::{Client, ClientBuilder};
 use serde::{de::Error, Deserialize, Deserializer};
 
 pub struct BandwidthClient {
@@ -36,6 +36,7 @@ impl BandwidthClient {
         admin_password: String,
         http_id: String,
     ) -> BandwidthClient {
+        info!("Pulling bandwidth data from {}", ip_address);
         BandwidthClient {
             url: format!("http://{}/update.cgi", ip_address),
             admin_username,
@@ -47,7 +48,9 @@ impl BandwidthClient {
         }
     }
 
-    pub fn get_bandwidth(&self) -> Result<HashMap<String, BandwidthMeasurement>, reqwest::Error> {
+    pub async fn get_bandwidth(
+        &self,
+    ) -> Result<HashMap<String, BandwidthMeasurement>, reqwest::Error> {
         let response = self
             .client
             .post(&self.url.clone())
@@ -56,8 +59,9 @@ impl BandwidthClient {
                 Some(self.admin_password.clone()),
             )
             .body(self.body.clone())
-            .send()?;
-        let body = response.text()?;
+            .send()
+            .await?;
+        let body = response.text().await?;
         Ok(BandwidthClient::parse_body(body))
     }
 
