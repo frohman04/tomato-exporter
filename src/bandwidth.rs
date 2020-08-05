@@ -16,9 +16,9 @@ pub struct BandwidthClient {
 #[derive(Debug, Deserialize, PartialEq)]
 pub struct BandwidthMeasurement {
     #[serde(deserialize_with = "from_hex")]
-    rx: u64,
+    pub rx: u64,
     #[serde(deserialize_with = "from_hex")]
-    tx: u64,
+    pub tx: u64,
 }
 
 fn from_hex<'de, D>(deserializer: D) -> Result<u64, D::Error>
