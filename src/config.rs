@@ -2,8 +2,8 @@ use std::fs;
 
 use serde::Deserialize;
 
-pub fn load_conf() -> Config {
-    let conf_str = fs::read_to_string("conf.yaml").expect("Unable to find config file");
+pub fn load_conf(path: String) -> Config {
+    let conf_str = fs::read_to_string(path).expect("Unable to find config file");
     let conf: Config = serde_yaml::from_str(conf_str.as_str()).expect("Unable to load config file");
     conf
 }

@@ -1,4 +1,5 @@
 extern crate actix_web;
+extern crate clap;
 #[macro_use]
 extern crate log;
 extern crate regex;
@@ -30,7 +31,18 @@ async fn main() -> std::io::Result<()> {
     )])
     .unwrap();
 
-    let conf = config::load_conf();
+    let matches = clap::App::new("tomato_exporter")
+        .version("0.1")
+        .author("Chris Lieb")
+        .arg(
+            clap::Arg::with_name("conf")
+                .short("c")
+                .long("conf")
+                .default_value("conf.yaml"),
+        )
+        .get_matches();
+
+    let conf = config::load_conf(matches.value_of("conf").unwrap().to_string());
     let client = conf
         .modules
         .mod_bandwidth
