@@ -1,16 +1,13 @@
 use std::collections::HashMap;
 
 use regex::Regex;
-use reqwest::{Client, ClientBuilder};
 use serde::{de::Error, Deserialize, Deserializer};
+
+use crate::tomato::TomatoClient;
 
 #[derive(Clone)]
 pub struct BandwidthClient {
-    url: String,
-    admin_username: String,
-    admin_password: String,
-    body: String,
-    client: Client,
+    client: TomatoClient,
 }
 
 #[derive(Debug, Deserialize, PartialEq)]
@@ -31,38 +28,20 @@ where
 }
 
 impl BandwidthClient {
-    pub fn new(
-        ip_address: String,
-        admin_username: String,
-        admin_password: String,
-        http_id: String,
-    ) -> BandwidthClient {
-        info!("Pulling bandwidth data from {}", ip_address);
-        BandwidthClient {
-            url: format!("http://{}/update.cgi", ip_address),
-            admin_username,
-            admin_password,
-            body: format!("exec=netdev&_http_id={}", http_id),
-            client: ClientBuilder::new()
-                .build()
-                .expect("Unable to construct HTTP client"),
-        }
+    pub fn new(client: TomatoClient) -> BandwidthClient {
+        BandwidthClient { client }
     }
 
     pub async fn get_bandwidth(
         &self,
     ) -> Result<HashMap<String, BandwidthMeasurement>, reqwest::Error> {
-        let response = self
+        let body = self
             .client
-            .post(&self.url.clone())
-            .basic_auth(
-                self.admin_username.clone(),
-                Some(self.admin_password.clone()),
+            .make_request(
+                "update.cgi".to_string(),
+                Some(hashmap! {"exec".to_string() => "netdev".to_string()}),
             )
-            .body(self.body.clone())
-            .send()
             .await?;
-        let body = response.text().await?;
         Ok(BandwidthClient::parse_body(body))
     }
 

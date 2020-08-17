@@ -2,19 +2,19 @@ extern crate actix_web;
 extern crate clap;
 #[macro_use]
 extern crate log;
+#[macro_use]
+extern crate maplit;
 extern crate regex;
 extern crate reqwest;
 extern crate serde_json;
 extern crate serde_yaml;
 extern crate simplelog;
-
-#[cfg(test)]
-#[macro_use]
-extern crate maplit;
+extern crate url;
 
 mod bandwidth;
 mod config;
 mod prometheus;
+mod tomato;
 
 use actix_web::middleware::{Compress, Logger};
 use actix_web::{web, App, HttpServer};
@@ -47,20 +47,16 @@ async fn main() -> std::io::Result<()> {
         .modules
         .mod_bandwidth
         .map(|c| {
-            bandwidth::BandwidthClient::new(
-                c.router_ip,
-                c.admin_username,
-                c.admin_password,
-                c.http_id,
-            )
+            tomato::TomatoClient::new(c.router_ip, c.admin_username, c.admin_password, c.http_id)
         })
         .expect("Must define mod_bandwidth configuration");
+    let bandwidth_client = bandwidth::BandwidthClient::new(client);
 
     HttpServer::new(move || {
         App::new()
             .wrap(Logger::default())
             .wrap(Compress::default())
-            .data(WebState::new(client.clone()))
+            .data(WebState::new(bandwidth_client.clone()))
             .route("/metrics", web::get().to(metrics))
     })
     .bind(format!("{}:{}", conf.ip, conf.port))?
