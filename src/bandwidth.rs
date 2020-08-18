@@ -3,8 +3,7 @@ use std::collections::HashMap;
 use regex::Regex;
 use serde::{de::Error, Deserialize, Deserializer};
 
-use crate::data_client::DataClient;
-use crate::prometheus::{PromLabel, PromMetric, PromMetricType, PromSample};
+use crate::prometheus::{DataClient, PromLabel, PromMetric, PromMetricType, PromSample};
 use crate::tomato::TomatoClient;
 
 #[derive(Clone)]

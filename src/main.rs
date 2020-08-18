@@ -17,15 +17,15 @@ extern crate url;
 
 mod bandwidth;
 mod config;
-mod data_client;
 mod prometheus;
 mod tomato;
+mod web;
 
 use actix_web::middleware::{Compress, Logger};
-use actix_web::{web, App, HttpServer};
+use actix_web::{web as a_web, App, HttpServer};
 use simplelog::{CombinedLogger, Config, LevelFilter, TermLogger, TerminalMode};
 
-use prometheus::{metrics, WebState};
+use web::{metrics, WebState};
 
 #[actix_rt::main]
 async fn main() -> std::io::Result<()> {
@@ -62,7 +62,7 @@ async fn main() -> std::io::Result<()> {
             .wrap(Logger::default())
             .wrap(Compress::default())
             .data(WebState::new(vec![Box::new(bandwidth_client.clone())]))
-            .route("/metrics", web::get().to(metrics))
+            .route("/metrics", a_web::get().to(metrics))
     })
     .bind(format!("{}:{}", conf.ip, conf.port))?
     .run()
