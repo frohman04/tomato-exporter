@@ -1,5 +1,9 @@
 extern crate actix_web;
+#[macro_use]
+extern crate async_trait;
 extern crate clap;
+extern crate dyn_clone;
+extern crate futures;
 #[macro_use]
 extern crate log;
 #[macro_use]
@@ -13,6 +17,7 @@ extern crate url;
 
 mod bandwidth;
 mod config;
+mod data_client;
 mod prometheus;
 mod tomato;
 
@@ -56,7 +61,7 @@ async fn main() -> std::io::Result<()> {
         App::new()
             .wrap(Logger::default())
             .wrap(Compress::default())
-            .data(WebState::new(bandwidth_client.clone()))
+            .data(WebState::new(vec![Box::new(bandwidth_client.clone())]))
             .route("/metrics", web::get().to(metrics))
     })
     .bind(format!("{}:{}", conf.ip, conf.port))?

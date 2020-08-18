@@ -1,59 +1,31 @@
 use actix_web::{error, web};
+use futures::future::join_all;
 
-use crate::bandwidth::BandwidthClient;
+use crate::data_client::DataClient;
 
 #[derive(Clone)]
 pub struct WebState {
-    bandwidth_client: BandwidthClient,
+    clients: Vec<Box<dyn DataClient>>,
 }
 
 impl WebState {
-    pub fn new(bandwidth_client: BandwidthClient) -> WebState {
-        WebState { bandwidth_client }
+    pub fn new(clients: Vec<Box<dyn DataClient>>) -> WebState {
+        WebState { clients }
     }
 }
 
 pub async fn metrics(data: web::Data<WebState>) -> Result<String, error::Error> {
-    let raw_metrics = data
-        .bandwidth_client
-        .get_bandwidth()
+    let results = join_all(data.clients.iter().map(|client| client.get_metrics()))
         .await
+        .into_iter()
+        .collect::<Result<Vec<Vec<PromMetric>>, reqwest::Error>>()
         .map_err(|err| error::ErrorInternalServerError(err))?;
+    let metrics = results.into_iter().flatten().collect();
 
-    let resp = PromResponse::new(vec![PromMetric::new(
-        "bandwidth",
-        "The number of bytes transmitted over an interface",
-        PromMetricType::Counter,
-        raw_metrics
-            .iter()
-            .map(|(key, value)| {
-                vec![
-                    PromSample::new(
-                        vec![
-                            PromLabel::new("if", key.to_string()),
-                            PromLabel::new("direction", "rx".to_string()),
-                        ],
-                        value.to_owned().rx as f64,
-                        None,
-                    ),
-                    PromSample::new(
-                        vec![
-                            PromLabel::new("if", key.to_string()),
-                            PromLabel::new("direction", "tx".to_string()),
-                        ],
-                        value.to_owned().tx as f64,
-                        None,
-                    ),
-                ]
-            })
-            .flatten()
-            .collect(),
-    )]);
-
-    Ok(resp.to_string())
+    Ok(PromResponse::new(metrics).to_string())
 }
 
-#[derive(PartialEq, PartialOrd, Debug)]
+#[derive(PartialEq, PartialOrd, Debug, Clone)]
 struct PromResponse {
     metrics: Vec<PromMetric>,
 }
@@ -72,9 +44,9 @@ impl PromResponse {
     }
 }
 
-#[derive(Eq, PartialEq, PartialOrd, Debug)]
+#[derive(Eq, PartialEq, PartialOrd, Debug, Clone)]
 #[allow(dead_code)]
-enum PromMetricType {
+pub enum PromMetricType {
     Counter,
     Gauge,
     Histogram,
@@ -82,8 +54,8 @@ enum PromMetricType {
     Untyped,
 }
 
-#[derive(PartialEq, PartialOrd, Debug)]
-struct PromMetric {
+#[derive(PartialEq, PartialOrd, Debug, Clone)]
+pub struct PromMetric {
     name: String,
     help: String,
     typ: PromMetricType,
@@ -121,8 +93,8 @@ impl PromMetric {
     }
 }
 
-#[derive(PartialEq, PartialOrd, Debug)]
-struct PromSample {
+#[derive(PartialEq, PartialOrd, Debug, Clone)]
+pub struct PromSample {
     labels: Vec<PromLabel>,
     value: f64,
     timestamp: Option<u64>,
@@ -153,8 +125,8 @@ impl PromSample {
     }
 }
 
-#[derive(Eq, PartialEq, PartialOrd, Debug)]
-struct PromLabel {
+#[derive(Eq, PartialEq, PartialOrd, Debug, Clone)]
+pub struct PromLabel {
     name: String,
     value: String,
 }
