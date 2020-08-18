@@ -3,6 +3,8 @@ use std::collections::HashMap;
 use regex::Regex;
 use serde::{de::Error, Deserialize, Deserializer};
 
+use crate::data_client::DataClient;
+use crate::prometheus::{PromLabel, PromMetric, PromMetricType, PromSample};
 use crate::tomato::TomatoClient;
 
 #[derive(Clone)]
@@ -57,6 +59,42 @@ impl BandwidthClient {
         let parsed: HashMap<String, BandwidthMeasurement> =
             serde_json::from_str(cleaned).expect("Unable to parse response");
         parsed
+    }
+}
+
+#[async_trait]
+impl DataClient for BandwidthClient {
+    async fn get_metrics(&self) -> Result<Vec<PromMetric>, reqwest::Error> {
+        let raw_metrics = self.get_bandwidth().await?;
+        Ok(vec![PromMetric::new(
+            "bandwidth",
+            "The number of bytes transmitted over an interface",
+            PromMetricType::Counter,
+            raw_metrics
+                .iter()
+                .map(|(key, value)| {
+                    vec![
+                        PromSample::new(
+                            vec![
+                                PromLabel::new("if", key.to_string()),
+                                PromLabel::new("direction", "rx".to_string()),
+                            ],
+                            value.to_owned().rx as f64,
+                            None,
+                        ),
+                        PromSample::new(
+                            vec![
+                                PromLabel::new("if", key.to_string()),
+                                PromLabel::new("direction", "tx".to_string()),
+                            ],
+                            value.to_owned().tx as f64,
+                            None,
+                        ),
+                    ]
+                })
+                .flatten()
+                .collect(),
+        )])
     }
 }
 
