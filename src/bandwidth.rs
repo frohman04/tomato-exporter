@@ -12,7 +12,7 @@ pub struct BandwidthClient {
 }
 
 #[derive(Debug, Deserialize, PartialEq)]
-pub struct BandwidthMeasurement {
+struct BandwidthMeasurement {
     #[serde(deserialize_with = "from_hex")]
     pub rx: u64,
     #[serde(deserialize_with = "from_hex")]
@@ -33,9 +33,7 @@ impl BandwidthClient {
         BandwidthClient { client }
     }
 
-    pub async fn get_bandwidth(
-        &self,
-    ) -> Result<HashMap<String, BandwidthMeasurement>, reqwest::Error> {
+    async fn get_bandwidth(&self) -> Result<HashMap<String, BandwidthMeasurement>, reqwest::Error> {
         let body = self
             .client
             .make_request(
@@ -111,7 +109,6 @@ mod test {
         'eth2':{rx:0x5ed3a58a,tx:0xe03baf1e},\
         'br0':{rx:0xd6dd237d,tx:0x4265a458}\
         };";
-        println!("{:?}", body);
         assert_eq!(
             BandwidthClient::parse_body(body.to_string()),
             hashmap! {
