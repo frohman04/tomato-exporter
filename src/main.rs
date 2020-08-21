@@ -17,6 +17,7 @@ extern crate url;
 
 mod bandwidth;
 mod config;
+mod node;
 mod prometheus;
 mod tomato;
 mod web;
@@ -55,13 +56,17 @@ async fn main() -> std::io::Result<()> {
             tomato::TomatoClient::new(c.router_ip, c.admin_username, c.admin_password, c.http_id)
         })
         .expect("Must define mod_bandwidth configuration");
-    let bandwidth_client = bandwidth::BandwidthClient::new(client);
+    let bandwidth_client = bandwidth::BandwidthClient::new(client.clone());
+    let node_client = node::NodeClient::new(client.clone());
 
     HttpServer::new(move || {
         App::new()
             .wrap(Logger::default())
             .wrap(Compress::default())
-            .data(WebState::new(vec![Box::new(bandwidth_client.clone())]))
+            .data(WebState::new(vec![
+                Box::new(bandwidth_client.clone()),
+                Box::new(node_client.clone()),
+            ]))
             .route("/metrics", a_web::get().to(metrics))
     })
     .bind(format!("{}:{}", conf.ip, conf.port))?
