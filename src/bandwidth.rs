@@ -63,35 +63,40 @@ impl BandwidthClient {
 impl DataClient for BandwidthClient {
     async fn get_metrics(&self) -> Result<Vec<PromMetric>, reqwest::Error> {
         let raw_metrics = self.get_bandwidth().await?;
-        Ok(vec![PromMetric::new(
-            "bandwidth",
-            "The number of bytes transmitted over an interface",
-            PromMetricType::Counter,
-            raw_metrics
-                .iter()
-                .map(|(key, value)| {
-                    vec![
-                        PromSample::new(
-                            vec![
-                                PromLabel::new("if", key.to_string()),
-                                PromLabel::new("direction", "rx".to_string()),
-                            ],
+        Ok(vec![
+            PromMetric::new(
+                "node_network_receive_bytes_total",
+                "Network device statistic receive_bytes",
+                PromMetricType::Counter,
+                raw_metrics
+                    .iter()
+                    .map(|(key, value)| {
+                        vec![PromSample::new(
+                            vec![PromLabel::new("device", key.to_string())],
                             value.to_owned().rx as f64,
                             None,
-                        ),
-                        PromSample::new(
-                            vec![
-                                PromLabel::new("if", key.to_string()),
-                                PromLabel::new("direction", "tx".to_string()),
-                            ],
+                        )]
+                    })
+                    .flatten()
+                    .collect(),
+            ),
+            PromMetric::new(
+                "node_network_transmit_bytes_total",
+                "Network device statistic transmit_bytes",
+                PromMetricType::Counter,
+                raw_metrics
+                    .iter()
+                    .map(|(key, value)| {
+                        vec![PromSample::new(
+                            vec![PromLabel::new("device", key.to_string())],
                             value.to_owned().tx as f64,
                             None,
-                        ),
-                    ]
-                })
-                .flatten()
-                .collect(),
-        )])
+                        )]
+                    })
+                    .flatten()
+                    .collect(),
+            ),
+        ])
     }
 }
 
