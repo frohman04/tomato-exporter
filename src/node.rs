@@ -90,13 +90,9 @@ impl NodeClient {
     fn parse_load(raw_load: u32) -> f32 {
         raw_load as f32 / 65536.0
     }
-}
 
-#[async_trait]
-impl DataClient for NodeClient {
-    async fn get_metrics(&self) -> Result<Vec<PromMetric>, reqwest::Error> {
-        let raw_metrics = self.get_node().await?;
-        Ok(vec![
+    fn raw_to_prom(raw_metrics: NodeMetrics) -> Vec<PromMetric> {
+        vec![
             PromMetric::new(
                 "node_load1",
                 "1m load average",
@@ -183,7 +179,15 @@ impl DataClient for NodeClient {
                 PromMetricType::Gauge,
                 vec![PromSample::new(Vec::new(), raw_metrics.uptime as f64, None)],
             ),
-        ])
+        ]
+    }
+}
+
+#[async_trait]
+impl DataClient for NodeClient {
+    async fn get_metrics(&self) -> Result<Vec<PromMetric>, reqwest::Error> {
+        let raw_metrics = self.get_node().await?;
+        Ok(NodeClient::raw_to_prom(raw_metrics))
     }
 }
 
@@ -524,6 +528,91 @@ break;
                 swap_free: 0,
                 uptime: 1391983,
             }
+        )
+    }
+
+    #[test]
+    fn test_raw_to_prom() {
+        assert_eq!(
+            NodeClient::raw_to_prom(NodeMetrics {
+                load_1m: 224 as f32 / 65536.0,
+                load_5m: 2400 as f32 / 65536.0,
+                load_15m: 0 as f32 / 65536.0,
+                ram_total: 261836800,
+                ram_buffer: 5394432,
+                ram_free: 227065856,
+                swap_total: 0,
+                swap_free: 0,
+                uptime: 1391983,
+            }),
+            vec![
+                PromMetric::new(
+                    "node_load1",
+                    "1m load average",
+                    PromMetricType::Gauge,
+                    vec![PromSample::new(
+                        Vec::new(),
+                        (224 as f32 / 65536.0) as f64,
+                        None,
+                    )],
+                ),
+                PromMetric::new(
+                    "node_load5",
+                    "5m load average",
+                    PromMetricType::Gauge,
+                    vec![PromSample::new(
+                        Vec::new(),
+                        (2400 as f32 / 65536.0) as f64,
+                        None,
+                    )],
+                ),
+                PromMetric::new(
+                    "node_load15",
+                    "15m load average",
+                    PromMetricType::Gauge,
+                    vec![PromSample::new(
+                        Vec::new(),
+                        (0 as f32 / 65536.0) as f64,
+                        None,
+                    )],
+                ),
+                PromMetric::new(
+                    "node_memory_MemTotal_bytes",
+                    "Memory information field MemTotal_bytes",
+                    PromMetricType::Gauge,
+                    vec![PromSample::new(Vec::new(), 261836800 as f64, None,)],
+                ),
+                PromMetric::new(
+                    "node_memory_Buffers_bytes",
+                    "Memory information field Buffers_bytes",
+                    PromMetricType::Gauge,
+                    vec![PromSample::new(Vec::new(), 5394432 as f64, None,)],
+                ),
+                PromMetric::new(
+                    "node_memory_MemFree_bytes",
+                    "Memory information field MemFree_bytes",
+                    PromMetricType::Gauge,
+                    vec![PromSample::new(Vec::new(), 227065856 as f64, None,)],
+                ),
+                PromMetric::new(
+                    "node_memory_SwapTotal_bytes",
+                    "Memory information field SwapTotal_bytes",
+                    PromMetricType::Gauge,
+                    vec![PromSample::new(Vec::new(), 0 as f64, None,)],
+                ),
+                PromMetric::new(
+                    "node_memory_SwapFree_bytes",
+                    "Memory information field SwapFree_bytes",
+                    PromMetricType::Gauge,
+                    vec![PromSample::new(Vec::new(), 0 as f64, None,)],
+                ),
+                PromMetric::new(
+                    "node_time_seconds",
+                    "System time in seconds since epoch (1970)",
+                    PromMetricType::Gauge,
+                    vec![PromSample::new(Vec::new(), 1391983 as f64, None)],
+                ),
+            ]
         )
     }
 }
