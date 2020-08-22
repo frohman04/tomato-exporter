@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 
 use regex::Regex;
 use serde::{de::Error, Deserialize, Deserializer};
@@ -33,7 +33,9 @@ impl BandwidthClient {
         BandwidthClient { client }
     }
 
-    async fn get_bandwidth(&self) -> Result<HashMap<String, BandwidthMeasurement>, reqwest::Error> {
+    async fn get_bandwidth(
+        &self,
+    ) -> Result<BTreeMap<String, BandwidthMeasurement>, reqwest::Error> {
         let body = self
             .client
             .make_request(
@@ -44,7 +46,7 @@ impl BandwidthClient {
         Ok(BandwidthClient::parse_body(body))
     }
 
-    fn parse_body(body: String) -> HashMap<String, BandwidthMeasurement> {
+    fn parse_body(body: String) -> BTreeMap<String, BandwidthMeasurement> {
         let regex = Regex::new(r"(0x[0-9a-fA-F]+)").unwrap();
         let cleaned = body
             .replace("netdev=", "")
@@ -53,17 +55,13 @@ impl BandwidthClient {
             .replace("rx", "\"rx\"")
             .replace("tx", "\"tx\"");
         let cleaned = &*regex.replace_all(cleaned.as_str(), "\"$1\"");
-        let parsed: HashMap<String, BandwidthMeasurement> =
+        let parsed: BTreeMap<String, BandwidthMeasurement> =
             serde_json::from_str(cleaned).expect("Unable to parse response");
         parsed
     }
-}
 
-#[async_trait]
-impl DataClient for BandwidthClient {
-    async fn get_metrics(&self) -> Result<Vec<PromMetric>, reqwest::Error> {
-        let raw_metrics = self.get_bandwidth().await?;
-        Ok(vec![
+    fn raw_to_prom(raw_metrics: BTreeMap<String, BandwidthMeasurement>) -> Vec<PromMetric> {
+        vec![
             PromMetric::new(
                 "node_network_receive_bytes_total",
                 "Network device statistic receive_bytes",
@@ -96,7 +94,15 @@ impl DataClient for BandwidthClient {
                     .flatten()
                     .collect(),
             ),
-        ])
+        ]
+    }
+}
+
+#[async_trait]
+impl DataClient for BandwidthClient {
+    async fn get_metrics(&self) -> Result<Vec<PromMetric>, reqwest::Error> {
+        let raw_metrics = self.get_bandwidth().await?;
+        Ok(BandwidthClient::raw_to_prom(raw_metrics))
     }
 }
 
@@ -116,7 +122,7 @@ mod test {
         };";
         assert_eq!(
             BandwidthClient::parse_body(body.to_string()),
-            hashmap! {
+            btreemap! {
                 "eth0".to_string() => BandwidthMeasurement { rx: 2876663457, tx: 1781272596 },
                 "eth1".to_string() => BandwidthMeasurement { rx: 1091707937, tx: 220676085 },
                 "eth2".to_string() => BandwidthMeasurement { rx: 1590928778, tx: 3762007838 },
@@ -124,6 +130,96 @@ mod test {
                 "vlan2".to_string() => BandwidthMeasurement { rx: 590939678, tx: 3868443361 },
                 "br0".to_string() => BandwidthMeasurement { rx: 3604816765, tx: 1113957464 },
             }
+        )
+    }
+
+    #[test]
+    fn test_raw_to_prom() {
+        assert_eq!(
+            BandwidthClient::raw_to_prom(btreemap! {
+                "eth0".to_string() => BandwidthMeasurement { rx: 2876663457, tx: 1781272596 },
+                "eth1".to_string() => BandwidthMeasurement { rx: 1091707937, tx: 220676085 },
+                "eth2".to_string() => BandwidthMeasurement { rx: 1590928778, tx: 3762007838 },
+                "vlan1".to_string() => BandwidthMeasurement { rx: 1280153509, tx: 2208073017 },
+                "vlan2".to_string() => BandwidthMeasurement { rx: 590939678, tx: 3868443361 },
+                "br0".to_string() => BandwidthMeasurement { rx: 3604816765, tx: 1113957464 },
+            }),
+            vec![
+                PromMetric::new(
+                    "node_network_receive_bytes_total",
+                    "Network device statistic receive_bytes",
+                    PromMetricType::Counter,
+                    vec![
+                        PromSample::new(
+                            vec![PromLabel::new("device", "br0".to_string())],
+                            3604816765f64,
+                            None
+                        ),
+                        PromSample::new(
+                            vec![PromLabel::new("device", "eth0".to_string())],
+                            2876663457f64,
+                            None
+                        ),
+                        PromSample::new(
+                            vec![PromLabel::new("device", "eth1".to_string())],
+                            1091707937f64,
+                            None
+                        ),
+                        PromSample::new(
+                            vec![PromLabel::new("device", "eth2".to_string())],
+                            1590928778f64,
+                            None
+                        ),
+                        PromSample::new(
+                            vec![PromLabel::new("device", "vlan1".to_string())],
+                            1280153509f64,
+                            None
+                        ),
+                        PromSample::new(
+                            vec![PromLabel::new("device", "vlan2".to_string())],
+                            590939678f64,
+                            None
+                        ),
+                    ],
+                ),
+                PromMetric::new(
+                    "node_network_transmit_bytes_total",
+                    "Network device statistic transmit_bytes",
+                    PromMetricType::Counter,
+                    vec![
+                        PromSample::new(
+                            vec![PromLabel::new("device", "br0".to_string())],
+                            1113957464f64,
+                            None
+                        ),
+                        PromSample::new(
+                            vec![PromLabel::new("device", "eth0".to_string())],
+                            1781272596f64,
+                            None
+                        ),
+                        PromSample::new(
+                            vec![PromLabel::new("device", "eth1".to_string())],
+                            220676085f64,
+                            None
+                        ),
+                        PromSample::new(
+                            vec![PromLabel::new("device", "eth2".to_string())],
+                            3762007838f64,
+                            None
+                        ),
+                        PromSample::new(
+                            vec![PromLabel::new("device", "vlan1".to_string())],
+                            2208073017f64,
+                            None
+                        ),
+                        PromSample::new(
+                            vec![PromLabel::new("device", "vlan2".to_string())],
+                            3868443361f64,
+                            None
+                        ),
+                    ]
+                ),
+            ]
         )
     }
 }
