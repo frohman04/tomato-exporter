@@ -11,4 +11,4 @@ set -x
 cargo test
 cargo build --release --target armv7-unknown-linux-gnueabihf
 scp conf.yaml target/armv7-unknown-linux-gnueabihf/release/tomato-exporter gilneas:~
-ssh gilneas -- "chmod +x ~/tomato-exporter && sudo mv ~/tomato-exporter /usr/local/bin && sudo mv ~/conf.yaml /etc/tomato-exporter/conf.yaml && sudo systemctl restart tomato_exporter"
+ssh gilneas -- "chmod +x ~/tomato-exporter && sudo mv ~/tomato-exporter /usr/local/bin/tomato_exporter && sudo mv ~/conf.yaml /etc/tomato-exporter/conf.yaml && sudo systemctl restart tomato_exporter"
