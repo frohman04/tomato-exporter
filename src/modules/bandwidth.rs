@@ -3,8 +3,8 @@ use std::collections::BTreeMap;
 use regex::Regex;
 use serde::{de::Error, Deserialize, Deserializer};
 
+use crate::modules::tomato::TomatoClient;
 use crate::prometheus::{DataClient, PromLabel, PromMetric, PromMetricType, PromSample};
-use crate::tomato::TomatoClient;
 
 #[derive(Clone)]
 pub struct BandwidthClient {
