@@ -3,12 +3,12 @@ use std::collections::HashMap;
 use regex::Regex;
 use serde::Deserialize;
 
-use crate::modules::tomato::TomatoClient;
-use crate::prometheus::{DataClient, PromMetric, PromMetricType, PromSample};
+use crate::client::{DataClient, TomatoClientInternal};
+use crate::prometheus::{PromMetric, PromMetricType, PromSample};
 
 #[derive(Clone)]
 pub struct NodeClient {
-    client: TomatoClient,
+    client: TomatoClientInternal,
 }
 
 #[derive(Debug, PartialEq)]
@@ -46,7 +46,7 @@ struct SysInfo {
 }
 
 impl NodeClient {
-    pub fn new(client: TomatoClient) -> NodeClient {
+    pub fn new(client: TomatoClientInternal) -> NodeClient {
         NodeClient { client }
     }
 

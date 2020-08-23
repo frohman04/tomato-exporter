@@ -15,8 +15,8 @@ extern crate serde_yaml;
 extern crate simplelog;
 extern crate url;
 
+mod client;
 mod config;
-mod modules;
 mod prometheus;
 mod web;
 
@@ -26,9 +26,7 @@ use simplelog::{CombinedLogger, Config, LevelFilter, TermLogger, TerminalMode};
 
 use web::{metrics, WebState};
 
-use modules::bandwidth::BandwidthClient;
-use modules::node::NodeClient;
-use modules::tomato::TomatoClient;
+use client::TomatoClient;
 
 #[actix_rt::main]
 async fn main() -> std::io::Result<()> {
@@ -56,17 +54,12 @@ async fn main() -> std::io::Result<()> {
         .mod_bandwidth
         .map(|c| TomatoClient::new(c.router_ip, c.admin_username, c.admin_password, c.http_id))
         .expect("Must define mod_bandwidth configuration");
-    let bandwidth_client = BandwidthClient::new(client.clone());
-    let node_client = NodeClient::new(client.clone());
 
     HttpServer::new(move || {
         App::new()
             .wrap(Logger::default())
             .wrap(Compress::default())
-            .data(WebState::new(vec![
-                Box::new(bandwidth_client.clone()),
-                Box::new(node_client.clone()),
-            ]))
+            .data(WebState::new(client.clone()))
             .route("/metrics", a_web::get().to(metrics))
     })
     .bind(format!("{}:{}", conf.ip, conf.port))?
