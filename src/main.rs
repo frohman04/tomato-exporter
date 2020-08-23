@@ -15,11 +15,9 @@ extern crate serde_yaml;
 extern crate simplelog;
 extern crate url;
 
-mod bandwidth;
 mod config;
-mod node;
+mod modules;
 mod prometheus;
-mod tomato;
 mod web;
 
 use actix_web::middleware::{Compress, Logger};
@@ -27,6 +25,10 @@ use actix_web::{web as a_web, App, HttpServer};
 use simplelog::{CombinedLogger, Config, LevelFilter, TermLogger, TerminalMode};
 
 use web::{metrics, WebState};
+
+use modules::bandwidth::BandwidthClient;
+use modules::node::NodeClient;
+use modules::tomato::TomatoClient;
 
 #[actix_rt::main]
 async fn main() -> std::io::Result<()> {
@@ -52,12 +54,10 @@ async fn main() -> std::io::Result<()> {
     let client = conf
         .modules
         .mod_bandwidth
-        .map(|c| {
-            tomato::TomatoClient::new(c.router_ip, c.admin_username, c.admin_password, c.http_id)
-        })
+        .map(|c| TomatoClient::new(c.router_ip, c.admin_username, c.admin_password, c.http_id))
         .expect("Must define mod_bandwidth configuration");
-    let bandwidth_client = bandwidth::BandwidthClient::new(client.clone());
-    let node_client = node::NodeClient::new(client.clone());
+    let bandwidth_client = BandwidthClient::new(client.clone());
+    let node_client = NodeClient::new(client.clone());
 
     HttpServer::new(move || {
         App::new()

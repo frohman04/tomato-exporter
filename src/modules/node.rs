@@ -3,8 +3,8 @@ use std::collections::HashMap;
 use regex::Regex;
 use serde::Deserialize;
 
+use crate::modules::tomato::TomatoClient;
 use crate::prometheus::{DataClient, PromMetric, PromMetricType, PromSample};
-use crate::tomato::TomatoClient;
 
 #[derive(Clone)]
 pub struct NodeClient {
