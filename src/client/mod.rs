@@ -1,15 +1,27 @@
+mod bandwidth;
+mod node;
+
 use std::collections::HashMap;
 
+use dyn_clone::DynClone;
+use futures::future::join_all;
 use reqwest::{Client, ClientBuilder};
 use url::form_urlencoded;
 
+use crate::client::bandwidth::BandwidthClient;
+use crate::client::node::NodeClient;
+use crate::prometheus::{PromMetric, PromResponse};
+
+#[async_trait]
+trait DataClient: DynClone + Send {
+    async fn get_metrics(&self) -> Result<Vec<PromMetric>, reqwest::Error>;
+}
+
+dyn_clone::clone_trait_object!(DataClient);
+
 #[derive(Clone)]
 pub struct TomatoClient {
-    hostname: String,
-    admin_username: String,
-    admin_password: String,
-    http_id: String,
-    client: Client,
+    data_clients: Vec<Box<dyn DataClient>>,
 }
 
 impl TomatoClient {
@@ -19,8 +31,44 @@ impl TomatoClient {
         admin_password: String,
         http_id: String,
     ) -> TomatoClient {
-        info!("Creating TomatoUSB client for {}", ip_address);
+        let client = TomatoClientInternal::new(ip_address, admin_username, admin_password, http_id);
         TomatoClient {
+            data_clients: vec![
+                Box::new(BandwidthClient::new(client.clone())),
+                Box::new(NodeClient::new(client.clone())),
+            ],
+        }
+    }
+
+    pub async fn get_metrics(&self) -> Result<PromResponse, reqwest::Error> {
+        let results = join_all(self.data_clients.iter().map(|client| client.get_metrics()))
+            .await
+            .into_iter()
+            .collect::<Result<Vec<Vec<PromMetric>>, reqwest::Error>>()?;
+        let metrics = results.into_iter().flatten().collect();
+
+        Ok(PromResponse::new(metrics))
+    }
+}
+
+#[derive(Clone)]
+pub struct TomatoClientInternal {
+    hostname: String,
+    admin_username: String,
+    admin_password: String,
+    http_id: String,
+    client: Client,
+}
+
+impl TomatoClientInternal {
+    pub fn new(
+        ip_address: String,
+        admin_username: String,
+        admin_password: String,
+        http_id: String,
+    ) -> TomatoClientInternal {
+        info!("Creating TomatoUSB client for {}", ip_address);
+        TomatoClientInternal {
             hostname: format!("http://{}", ip_address),
             admin_username,
             admin_password,

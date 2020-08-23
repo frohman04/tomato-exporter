@@ -1,12 +1,3 @@
-use dyn_clone::DynClone;
-
-#[async_trait]
-pub trait DataClient: DynClone {
-    async fn get_metrics(&self) -> Result<Vec<PromMetric>, reqwest::Error>;
-}
-
-dyn_clone::clone_trait_object!(DataClient);
-
 #[derive(PartialEq, PartialOrd, Debug, Clone)]
 pub struct PromResponse {
     metrics: Vec<PromMetric>,

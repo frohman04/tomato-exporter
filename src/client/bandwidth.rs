@@ -3,12 +3,12 @@ use std::collections::BTreeMap;
 use regex::Regex;
 use serde::{de::Error, Deserialize, Deserializer};
 
-use crate::modules::tomato::TomatoClient;
-use crate::prometheus::{DataClient, PromLabel, PromMetric, PromMetricType, PromSample};
+use crate::client::{DataClient, TomatoClientInternal};
+use crate::prometheus::{PromLabel, PromMetric, PromMetricType, PromSample};
 
 #[derive(Clone)]
 pub struct BandwidthClient {
-    client: TomatoClient,
+    client: TomatoClientInternal,
 }
 
 #[derive(Debug, Deserialize, PartialEq)]
@@ -29,7 +29,7 @@ where
 }
 
 impl BandwidthClient {
-    pub fn new(client: TomatoClient) -> BandwidthClient {
+    pub fn new(client: TomatoClientInternal) -> BandwidthClient {
         BandwidthClient { client }
     }
 
