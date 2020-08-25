@@ -12,14 +12,14 @@ pub struct CpuClient {
 
 #[derive(Debug, PartialEq)]
 struct CpuStats {
-    user: u32,
-    nice: u32,
-    system: u32,
-    idle: u32,
-    iowait: Option<u32>,
-    irq: Option<u32>,
-    softirq: Option<u32>,
-    steal: Option<u32>,
+    user: f32,
+    nice: f32,
+    system: f32,
+    idle: f32,
+    iowait: Option<f32>,
+    irq: Option<f32>,
+    softirq: Option<f32>,
+    steal: Option<f32>,
 }
 
 impl CpuClient {
@@ -53,10 +53,10 @@ impl CpuClient {
                 (
                     cpu_id,
                     CpuStats {
-                        user: jiffies[0],
-                        nice: jiffies[1],
-                        system: jiffies[2],
-                        idle: jiffies[3],
+                        user: CpuClient::get_jiffie(&jiffies, 0),
+                        nice: CpuClient::get_jiffie(&jiffies, 1),
+                        system: CpuClient::get_jiffie(&jiffies, 2),
+                        idle: CpuClient::get_jiffie(&jiffies, 3),
                         iowait: CpuClient::opt_jiffie(&jiffies, 4),
                         irq: CpuClient::opt_jiffie(&jiffies, 5),
                         softirq: CpuClient::opt_jiffie(&jiffies, 6),
@@ -67,9 +67,13 @@ impl CpuClient {
             .collect()
     }
 
-    fn opt_jiffie(jiffies: &Vec<u32>, i: usize) -> Option<u32> {
+    fn get_jiffie(jiffies: &Vec<u32>, i: usize) -> f32 {
+        jiffies[i] as f32 / 100f32
+    }
+
+    fn opt_jiffie(jiffies: &Vec<u32>, i: usize) -> Option<f32> {
         if jiffies.len() > i {
-            Some(jiffies[i])
+            Some(jiffies[i] as f32 / 100f32)
         } else {
             None
         }
@@ -207,14 +211,14 @@ procs_blocked 0"
                     .to_string()
             ),
             btreemap!(0u8 => CpuStats {
-                user: 162283,
-                nice: 0,
-                system: 230563,
-                idle: 168024492,
-                iowait: Some(2376),
-                irq: Some(293698),
-                softirq: Some(4732481),
-                steal: Some(0),
+                user: 162283 as f32 / 100f32,
+                nice: 0f32,
+                system: 230563 as f32 / 100f32,
+                idle: 168024492 as f32 / 100f32,
+                iowait: Some(2376 as f32 / 100f32),
+                irq: Some(293698 as f32 / 100f32),
+                softirq: Some(4732481 as f32 / 100f32),
+                steal: Some(0f32),
             })
         )
     }
@@ -223,14 +227,14 @@ procs_blocked 0"
     fn test_raw_to_prom() {
         assert_eq!(
             CpuClient::raw_to_prom(btreemap!(0 => CpuStats {
-                user: 162283,
-                nice: 0,
-                system: 230563,
-                idle: 168024492,
-                iowait: Some(2376),
-                irq: Some(293698),
-                softirq: Some(4732481),
-                steal: Some(0),
+                user: 162283 as f32 / 100f32,
+                nice: 0f32,
+                system: 230563 as f32 / 100f32,
+                idle: 168024492 as f32 / 100f32,
+                iowait: Some(2376 as f32 / 100f32),
+                irq: Some(293698 as f32 / 100f32),
+                softirq: Some(4732481 as f32 / 100f32),
+                steal: Some(0f32),
             })),
             vec![PromMetric::new(
                 "node_cpu_seconds_total",
@@ -242,7 +246,7 @@ procs_blocked 0"
                             PromLabel::new("cpu", "0".to_string()),
                             PromLabel::new("mode", "user".to_string()),
                         ],
-                        162283f64,
+                        (162283f32 / 100f32) as f64,
                         None
                     ),
                     PromSample::new(
@@ -258,7 +262,7 @@ procs_blocked 0"
                             PromLabel::new("cpu", "0".to_string()),
                             PromLabel::new("mode", "system".to_string()),
                         ],
-                        230563f64,
+                        (230563f32 / 100f32) as f64,
                         None
                     ),
                     PromSample::new(
@@ -266,7 +270,7 @@ procs_blocked 0"
                             PromLabel::new("cpu", "0".to_string()),
                             PromLabel::new("mode", "idle".to_string()),
                         ],
-                        168024492f64,
+                        (168024492f32 / 100f32) as f64,
                         None
                     ),
                     PromSample::new(
@@ -274,7 +278,7 @@ procs_blocked 0"
                             PromLabel::new("cpu", "0".to_string()),
                             PromLabel::new("mode", "iowait".to_string()),
                         ],
-                        2376f64,
+                        (2376f32 / 100f32) as f64,
                         None
                     ),
                     PromSample::new(
@@ -282,7 +286,7 @@ procs_blocked 0"
                             PromLabel::new("cpu", "0".to_string()),
                             PromLabel::new("mode", "irq".to_string()),
                         ],
-                        293698f64,
+                        (293698f32 / 100f32) as f64,
                         None
                     ),
                     PromSample::new(
@@ -290,7 +294,7 @@ procs_blocked 0"
                             PromLabel::new("cpu", "0".to_string()),
                             PromLabel::new("mode", "softirq".to_string()),
                         ],
-                        4732481f64,
+                        (4732481f32 / 100f32) as f64,
                         None
                     ),
                     PromSample::new(
