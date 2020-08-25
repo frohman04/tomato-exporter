@@ -173,12 +173,6 @@ impl NodeClient {
                     None,
                 )],
             ),
-            PromMetric::new(
-                "node_time_seconds",
-                "System time in seconds since epoch (1970)",
-                PromMetricType::Gauge,
-                vec![PromSample::new(Vec::new(), raw_metrics.uptime as f64, None)],
-            ),
         ]
     }
 }
@@ -605,12 +599,6 @@ break;
                     "Memory information field SwapFree_bytes",
                     PromMetricType::Gauge,
                     vec![PromSample::new(Vec::new(), 0 as f64, None,)],
-                ),
-                PromMetric::new(
-                    "node_time_seconds",
-                    "System time in seconds since epoch (1970)",
-                    PromMetricType::Gauge,
-                    vec![PromSample::new(Vec::new(), 1391983 as f64, None)],
                 ),
             ]
         )
