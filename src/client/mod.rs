@@ -1,5 +1,6 @@
 mod bandwidth;
 mod node;
+mod uname;
 
 use std::collections::HashMap;
 
@@ -10,6 +11,7 @@ use url::form_urlencoded;
 
 use crate::client::bandwidth::BandwidthClient;
 use crate::client::node::NodeClient;
+use crate::client::uname::UnameClient;
 use crate::prometheus::{PromMetric, PromResponse};
 
 #[async_trait]
@@ -36,6 +38,7 @@ impl TomatoClient {
             data_clients: vec![
                 Box::new(BandwidthClient::new(client.clone())),
                 Box::new(NodeClient::new(client.clone())),
+                Box::new(UnameClient::new(client.clone())),
             ],
         }
     }
@@ -105,5 +108,18 @@ impl TomatoClientInternal {
             .send()
             .await?;
         Ok(response.text().await?)
+    }
+
+    async fn run_command(&self, command: String) -> Result<String, reqwest::Error> {
+        self.make_request(
+            "shell.cgi".to_string(),
+            Some(hashmap! {
+                "action".to_string() => "execute".to_string(),
+                "nojs".to_string() => "1".to_string(),
+                "working_dir".to_string() => "/www".to_string(),
+                "command".to_string() => command,
+            }),
+        )
+        .await
     }
 }
