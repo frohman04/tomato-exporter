@@ -1,4 +1,5 @@
 mod bandwidth;
+mod cpu;
 mod node;
 mod uname;
 
@@ -10,6 +11,7 @@ use reqwest::{Client, ClientBuilder};
 use url::form_urlencoded;
 
 use crate::client::bandwidth::BandwidthClient;
+use crate::client::cpu::CpuClient;
 use crate::client::node::NodeClient;
 use crate::client::uname::UnameClient;
 use crate::prometheus::{PromMetric, PromResponse};
@@ -37,6 +39,7 @@ impl TomatoClient {
         TomatoClient {
             data_clients: vec![
                 Box::new(BandwidthClient::new(client.clone())),
+                Box::new(CpuClient::new(client.clone())),
                 Box::new(NodeClient::new(client.clone())),
                 Box::new(UnameClient::new(client.clone())),
             ],
