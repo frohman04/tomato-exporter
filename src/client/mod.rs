@@ -1,5 +1,6 @@
 mod bandwidth;
 mod cpu;
+mod mem;
 mod node;
 mod time;
 mod uname;
@@ -13,6 +14,7 @@ use url::form_urlencoded;
 
 use crate::client::bandwidth::BandwidthClient;
 use crate::client::cpu::CpuClient;
+use crate::client::mem::MemClient;
 use crate::client::node::NodeClient;
 use crate::client::time::TimeClient;
 use crate::client::uname::UnameClient;
@@ -42,6 +44,7 @@ impl TomatoClient {
             data_clients: vec![
                 Box::new(BandwidthClient::new(client.clone())),
                 Box::new(CpuClient::new(client.clone())),
+                Box::new(MemClient::new(client.clone())),
                 Box::new(NodeClient::new(client.clone())),
                 Box::new(TimeClient::new(client.clone())),
                 Box::new(UnameClient::new(client.clone())),
