@@ -123,56 +123,6 @@ impl NodeClient {
                     None,
                 )],
             ),
-            PromMetric::new(
-                "node_memory_MemTotal_bytes",
-                "Memory information field MemTotal_bytes",
-                PromMetricType::Gauge,
-                vec![PromSample::new(
-                    Vec::new(),
-                    raw_metrics.ram_total as f64,
-                    None,
-                )],
-            ),
-            PromMetric::new(
-                "node_memory_Buffers_bytes",
-                "Memory information field Buffers_bytes",
-                PromMetricType::Gauge,
-                vec![PromSample::new(
-                    Vec::new(),
-                    raw_metrics.ram_buffer as f64,
-                    None,
-                )],
-            ),
-            PromMetric::new(
-                "node_memory_MemFree_bytes",
-                "Memory information field MemFree_bytes",
-                PromMetricType::Gauge,
-                vec![PromSample::new(
-                    Vec::new(),
-                    raw_metrics.ram_free as f64,
-                    None,
-                )],
-            ),
-            PromMetric::new(
-                "node_memory_SwapTotal_bytes",
-                "Memory information field SwapTotal_bytes",
-                PromMetricType::Gauge,
-                vec![PromSample::new(
-                    Vec::new(),
-                    raw_metrics.swap_total as f64,
-                    None,
-                )],
-            ),
-            PromMetric::new(
-                "node_memory_SwapFree_bytes",
-                "Memory information field SwapFree_bytes",
-                PromMetricType::Gauge,
-                vec![PromSample::new(
-                    Vec::new(),
-                    raw_metrics.swap_free as f64,
-                    None,
-                )],
-            ),
         ]
     }
 }
@@ -569,36 +519,6 @@ break;
                         (0 as f32 / 65536.0) as f64,
                         None,
                     )],
-                ),
-                PromMetric::new(
-                    "node_memory_MemTotal_bytes",
-                    "Memory information field MemTotal_bytes",
-                    PromMetricType::Gauge,
-                    vec![PromSample::new(Vec::new(), 261836800 as f64, None,)],
-                ),
-                PromMetric::new(
-                    "node_memory_Buffers_bytes",
-                    "Memory information field Buffers_bytes",
-                    PromMetricType::Gauge,
-                    vec![PromSample::new(Vec::new(), 5394432 as f64, None,)],
-                ),
-                PromMetric::new(
-                    "node_memory_MemFree_bytes",
-                    "Memory information field MemFree_bytes",
-                    PromMetricType::Gauge,
-                    vec![PromSample::new(Vec::new(), 227065856 as f64, None,)],
-                ),
-                PromMetric::new(
-                    "node_memory_SwapTotal_bytes",
-                    "Memory information field SwapTotal_bytes",
-                    PromMetricType::Gauge,
-                    vec![PromSample::new(Vec::new(), 0 as f64, None,)],
-                ),
-                PromMetric::new(
-                    "node_memory_SwapFree_bytes",
-                    "Memory information field SwapFree_bytes",
-                    PromMetricType::Gauge,
-                    vec![PromSample::new(Vec::new(), 0 as f64, None,)],
                 ),
             ]
         )
