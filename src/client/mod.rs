@@ -1,7 +1,7 @@
-mod bandwidth;
 mod cpu;
 mod load;
 mod mem;
+mod network;
 mod time;
 mod uname;
 
@@ -12,10 +12,10 @@ use futures::future::join_all;
 use reqwest::{Client, ClientBuilder};
 use url::form_urlencoded;
 
-use crate::client::bandwidth::BandwidthClient;
 use crate::client::cpu::CpuClient;
 use crate::client::load::LoadClient;
 use crate::client::mem::MemClient;
+use crate::client::network::NetworkClient;
 use crate::client::time::TimeClient;
 use crate::client::uname::UnameClient;
 use crate::prometheus::{PromMetric, PromResponse};
@@ -42,10 +42,10 @@ impl TomatoClient {
         let client = TomatoClientInternal::new(ip_address, admin_username, admin_password, http_id);
         TomatoClient {
             data_clients: vec![
-                Box::new(BandwidthClient::new(client.clone())),
                 Box::new(CpuClient::new(client.clone())),
                 Box::new(LoadClient::new(client.clone())),
                 Box::new(MemClient::new(client.clone())),
+                Box::new(NetworkClient::new(client.clone())),
                 Box::new(TimeClient::new(client.clone())),
                 Box::new(UnameClient::new(client.clone())),
             ],

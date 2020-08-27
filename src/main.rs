@@ -10,7 +10,6 @@ extern crate log;
 extern crate maplit;
 extern crate regex;
 extern crate reqwest;
-extern crate serde_json;
 extern crate serde_yaml;
 extern crate simplelog;
 extern crate url;
