@@ -21,17 +21,17 @@ use crate::client::uname::UnameClient;
 use crate::prometheus::{PromMetric, PromResponse};
 
 #[async_trait]
-trait DataClient: DynClone + Send {
+trait Scraper: DynClone + Send {
     async fn get_metrics(&self) -> Result<Vec<PromMetric>, reqwest::Error>;
 
     fn get_name(&self) -> String;
 }
 
-dyn_clone::clone_trait_object!(DataClient);
+dyn_clone::clone_trait_object!(Scraper);
 
 #[derive(Clone)]
 pub struct TomatoClient {
-    data_clients: Vec<Box<dyn DataClient>>,
+    data_clients: Vec<Box<dyn Scraper>>,
 }
 
 impl TomatoClient {
