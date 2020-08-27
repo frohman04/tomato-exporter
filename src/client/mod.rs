@@ -23,6 +23,8 @@ use crate::prometheus::{PromMetric, PromResponse};
 #[async_trait]
 trait DataClient: DynClone + Send {
     async fn get_metrics(&self) -> Result<Vec<PromMetric>, reqwest::Error>;
+
+    fn get_name(&self) -> String;
 }
 
 dyn_clone::clone_trait_object!(DataClient);

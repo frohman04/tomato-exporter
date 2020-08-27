@@ -114,6 +114,10 @@ impl DataClient for LoadClient {
         let raw_metrics = self.get_time().await?;
         Ok(LoadClient::raw_to_prom(raw_metrics))
     }
+
+    fn get_name(&self) -> String {
+        "load".to_string()
+    }
 }
 
 #[cfg(test)]

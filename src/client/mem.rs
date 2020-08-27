@@ -63,6 +63,10 @@ impl DataClient for MemClient {
         let raw_metrics = self.get_mem().await?;
         Ok(MemClient::raw_to_prom(raw_metrics))
     }
+
+    fn get_name(&self) -> String {
+        "memory".to_string()
+    }
 }
 
 #[cfg(test)]

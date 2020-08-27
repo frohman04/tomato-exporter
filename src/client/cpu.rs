@@ -187,6 +187,10 @@ impl DataClient for CpuClient {
         let raw_metrics = self.get_cpu().await?;
         Ok(CpuClient::raw_to_prom(raw_metrics))
     }
+
+    fn get_name(&self) -> String {
+        "cpu".to_string()
+    }
 }
 
 #[cfg(test)]

@@ -86,6 +86,10 @@ impl DataClient for TimeClient {
         let raw_metrics = self.get_time().await?;
         Ok(TimeClient::raw_to_prom(raw_metrics))
     }
+
+    fn get_name(&self) -> String {
+        "time".to_string()
+    }
 }
 
 #[cfg(test)]

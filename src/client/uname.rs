@@ -73,6 +73,10 @@ impl DataClient for UnameClient {
         let raw_metrics = self.get_uname().await?;
         Ok(UnameClient::raw_to_prom(raw_metrics))
     }
+
+    fn get_name(&self) -> String {
+        "uname".to_string()
+    }
 }
 
 #[cfg(test)]
