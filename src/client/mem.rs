@@ -2,7 +2,7 @@ use std::collections::BTreeMap;
 
 use regex::Regex;
 
-use crate::client::{DataClient, TomatoClientInternal};
+use crate::client::{Scraper, TomatoClientInternal};
 use crate::prometheus::{PromMetric, PromMetricType, PromSample};
 
 #[derive(Clone)]
@@ -58,10 +58,14 @@ impl MemClient {
 }
 
 #[async_trait]
-impl DataClient for MemClient {
+impl Scraper for MemClient {
     async fn get_metrics(&self) -> Result<Vec<PromMetric>, reqwest::Error> {
         let raw_metrics = self.get_mem().await?;
         Ok(MemClient::raw_to_prom(raw_metrics))
+    }
+
+    fn get_name(&self) -> String {
+        "memory".to_string()
     }
 }
 

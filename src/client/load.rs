@@ -1,6 +1,6 @@
 use regex::{Captures, Regex};
 
-use crate::client::{DataClient, TomatoClientInternal};
+use crate::client::{Scraper, TomatoClientInternal};
 use crate::prometheus::{PromMetric, PromMetricType, PromSample};
 
 #[derive(Clone)]
@@ -109,10 +109,14 @@ impl LoadClient {
 }
 
 #[async_trait]
-impl DataClient for LoadClient {
+impl Scraper for LoadClient {
     async fn get_metrics(&self) -> Result<Vec<PromMetric>, reqwest::Error> {
         let raw_metrics = self.get_time().await?;
         Ok(LoadClient::raw_to_prom(raw_metrics))
+    }
+
+    fn get_name(&self) -> String {
+        "load".to_string()
     }
 }
 
