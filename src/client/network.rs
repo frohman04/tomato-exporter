@@ -2,7 +2,7 @@ use std::collections::BTreeMap;
 
 use regex::{Captures, Regex};
 
-use crate::client::{DataClient, TomatoClientInternal};
+use crate::client::{Scraper, TomatoClientInternal};
 use crate::prometheus::{PromLabel, PromMetric, PromMetricType, PromSample};
 
 #[derive(Clone)]
@@ -134,7 +134,7 @@ impl NetworkClient {
 }
 
 #[async_trait]
-impl DataClient for NetworkClient {
+impl Scraper for NetworkClient {
     async fn get_metrics(&self) -> Result<Vec<PromMetric>, reqwest::Error> {
         let raw_metrics = self.get_network().await?;
         Ok(NetworkClient::raw_to_prom(raw_metrics))
