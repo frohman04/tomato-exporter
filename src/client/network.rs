@@ -139,6 +139,10 @@ impl DataClient for NetworkClient {
         let raw_metrics = self.get_network().await?;
         Ok(NetworkClient::raw_to_prom(raw_metrics))
     }
+
+    fn get_name(&self) -> String {
+        "network".to_string()
+    }
 }
 
 #[cfg(test)]
