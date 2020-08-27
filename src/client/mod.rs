@@ -7,6 +7,7 @@ mod uname;
 
 use std::collections::HashMap;
 
+use ::time::OffsetDateTime;
 use dyn_clone::DynClone;
 use futures::future::join_all;
 use reqwest::{Client, ClientBuilder};
@@ -18,7 +19,7 @@ use crate::client::mem::MemClient;
 use crate::client::network::NetworkClient;
 use crate::client::time::TimeClient;
 use crate::client::uname::UnameClient;
-use crate::prometheus::{PromMetric, PromResponse};
+use crate::prometheus::{PromLabel, PromMetric, PromMetricType, PromResponse, PromSample};
 
 #[async_trait]
 trait Scraper: DynClone + Send {
@@ -28,6 +29,12 @@ trait Scraper: DynClone + Send {
 }
 
 dyn_clone::clone_trait_object!(Scraper);
+
+struct ScraperResult {
+    pub name: String,
+    pub duration: f64,
+    pub result: Result<Vec<PromMetric>, reqwest::Error>,
+}
 
 #[derive(Clone)]
 pub struct TomatoClient {
@@ -55,13 +62,60 @@ impl TomatoClient {
     }
 
     pub async fn get_metrics(&self) -> Result<PromResponse, reqwest::Error> {
-        let results = join_all(self.data_clients.iter().map(|client| client.get_metrics()))
-            .await
+        let results = join_all(
+            self.data_clients
+                .iter()
+                .map(|scraper| TomatoClient::run_scraper(scraper)),
+        )
+        .await
+        .into_iter()
+        .collect::<Vec<ScraperResult>>();
+
+        let mut scraper_durations: Vec<PromSample> = Vec::new();
+        let mut scraper_successes: Vec<PromSample> = Vec::new();
+        let mut metrics: Vec<PromMetric> = results
             .into_iter()
-            .collect::<Result<Vec<Vec<PromMetric>>, reqwest::Error>>()?;
-        let metrics = results.into_iter().flatten().collect();
+            .filter_map(|result| {
+                scraper_durations.push(PromSample::new(
+                    vec![PromLabel::new("collector", result.name.clone())],
+                    result.duration,
+                    None,
+                ));
+                scraper_successes.push(PromSample::new(
+                    vec![PromLabel::new("collector", result.name)],
+                    if result.result.is_ok() { 1f64 } else { 0f64 },
+                    None,
+                ));
+                result.result.ok()
+            })
+            .flatten()
+            .collect();
+        metrics.push(PromMetric::new(
+            "node_scrape_collector_duration_seconds",
+            "node_exporter: Duration of a collector scrape",
+            PromMetricType::Gauge,
+            scraper_durations,
+        ));
+        metrics.push(PromMetric::new(
+            "node_scrape_collector_success",
+            "Whether a collector succeeded",
+            PromMetricType::Gauge,
+            scraper_successes,
+        ));
 
         Ok(PromResponse::new(metrics))
+    }
+
+    async fn run_scraper(scraper: &Box<dyn Scraper>) -> ScraperResult {
+        let start_time = OffsetDateTime::now_utc();
+        let result = scraper.get_metrics().await;
+        let end_time = OffsetDateTime::now_utc();
+        let duration = (end_time - start_time).as_seconds_f64();
+        ScraperResult {
+            name: scraper.get_name(),
+            duration,
+            result,
+        }
     }
 }
 
