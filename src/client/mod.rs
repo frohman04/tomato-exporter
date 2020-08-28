@@ -56,7 +56,7 @@ impl TomatoClient {
                 Box::new(MemClient::new(client.clone())),
                 Box::new(NetworkClient::new(client.clone())),
                 Box::new(TimeClient::new(client.clone())),
-                Box::new(UnameClient::new(client.clone())),
+                Box::new(UnameClient::new(client)),
             ],
         }
     }
@@ -65,7 +65,7 @@ impl TomatoClient {
         let results = join_all(
             self.data_clients
                 .iter()
-                .map(|scraper| TomatoClient::run_scraper(scraper)),
+                .map(|scraper| TomatoClient::run_scraper(scraper.as_ref())),
         )
         .await
         .into_iter()
@@ -106,7 +106,7 @@ impl TomatoClient {
         Ok(PromResponse::new(metrics))
     }
 
-    async fn run_scraper(scraper: &Box<dyn Scraper>) -> ScraperResult {
+    async fn run_scraper(scraper: &dyn Scraper) -> ScraperResult {
         let start_time = OffsetDateTime::now_utc();
         let result = scraper.get_metrics().await;
         let end_time = OffsetDateTime::now_utc();
@@ -152,13 +152,13 @@ impl TomatoClientInternal {
         endpoint: String,
         args: Option<HashMap<String, String>>,
     ) -> Result<String, reqwest::Error> {
-        let arg_map = args.unwrap_or_else(|| HashMap::new());
+        let arg_map = args.unwrap_or_else(HashMap::new);
         let body = arg_map
-            .iter()
+            .into_iter()
             .fold(
                 form_urlencoded::Serializer::new(String::new())
                     .append_pair("_http_id", self.http_id.as_str()),
-                |bb, (key, value)| bb.append_pair(key.as_str().clone(), value.as_str().clone()),
+                |bb, (key, value)| bb.append_pair(key.as_str(), value.as_str()),
             )
             .finish();
 
