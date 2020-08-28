@@ -1,0 +1,2 @@
+[armv7-unknown-linux-gnueabihf]
+image = "cross-armv7:latest"

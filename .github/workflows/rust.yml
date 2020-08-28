@@ -42,6 +42,8 @@ jobs:
             ~/.cargo/git
             target
           key: ${{ runner.os }}-armv7-cargo-${{ hashFiles('**/Cargo.lock') }}
+      - run: |
+          docker build .github/docker -f .github/docker/Dockerfile.armv7 -t cross-armv7:latest
       - uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
@@ -52,5 +54,6 @@ jobs:
           command: test
       - uses: actions-rs/cargo@v1
         with:
+          use-cross: true
           command: build
           args: --target armv7-unknown-linux-gnueabihf --release
