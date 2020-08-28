@@ -69,14 +69,8 @@ jobs:
             ~/.cargo/git
             target
           key: ${{ runner.os }}-armv7-cargo-${{ hashFiles('**/Cargo.lock') }}
-      - uses: whoan/docker-build-with-cache-action@v5
-        with:
-          context: .github/docker
-          dockerfile: Dockerfile.armv7
-          image_name: cross-armv7
-          image_tag: latest
-          build_extra_args: --pull
-          push_image_and_stages: false
+      - run: |
+          docker build .github/docker -f .github/docker/Dockerfile.armv7 -t cross-armv7:latest
       - uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
