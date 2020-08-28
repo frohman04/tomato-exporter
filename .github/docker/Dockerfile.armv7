@@ -1,0 +1,8 @@
+FROM rustembedded/cross:armv7-unknown-linux-gnueabihf
+
+RUN dpkg --add-architecture "armhf" || echo "foreign-architecture armhf" > /etc/dpkg/dpkg.cfg.d/multiarch && \
+    apt-get update && \
+    apt-get install --assume-yes --no-install-recommends "libssl-dev:armhf" "openssl:armhf"
+
+ENV ARMV7_UNKNOWN_LINUX_GNUEABIHF_OPENSSL_LIB_DIR=/usr/lib/arm-linux-gnueabihf
+ENV ARMV7_UNKNOWN_LINUX_GNUEABIHF_OPENSSL_INCLUDE_DIR=/usr/include/openssl

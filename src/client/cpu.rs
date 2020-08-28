@@ -45,8 +45,7 @@ impl CpuClient {
                     .name("jiffies")
                     .unwrap()
                     .as_str()
-                    .split(" ")
-                    .into_iter()
+                    .split(' ')
                     .map(|jif| jif.parse::<u32>().unwrap())
                     .collect();
 
@@ -67,11 +66,11 @@ impl CpuClient {
             .collect()
     }
 
-    fn get_jiffie(jiffies: &Vec<u32>, i: usize) -> f32 {
+    fn get_jiffie(jiffies: &[u32], i: usize) -> f32 {
         jiffies[i] as f32 / 100f32
     }
 
-    fn opt_jiffie(jiffies: &Vec<u32>, i: usize) -> Option<f32> {
+    fn opt_jiffie(jiffies: &[u32], i: usize) -> Option<f32> {
         if jiffies.len() > i {
             Some(jiffies[i] as f32 / 100f32)
         } else {
@@ -121,58 +120,46 @@ impl CpuClient {
                         ),
                     ]
                     .into_iter()
-                    .chain(cpu.iowait.map_or_else(
-                        || Vec::new(),
-                        |iowait| {
-                            vec![PromSample::new(
-                                vec![
-                                    PromLabel::new("cpu", i.to_string()),
-                                    PromLabel::new("mode", "iowait".to_string()),
-                                ],
-                                iowait as f64,
-                                None,
-                            )]
-                        },
-                    ))
-                    .chain(cpu.irq.map_or_else(
-                        || Vec::new(),
-                        |irq| {
-                            vec![PromSample::new(
-                                vec![
-                                    PromLabel::new("cpu", i.to_string()),
-                                    PromLabel::new("mode", "irq".to_string()),
-                                ],
-                                irq as f64,
-                                None,
-                            )]
-                        },
-                    ))
-                    .chain(cpu.softirq.map_or_else(
-                        || Vec::new(),
-                        |softirq| {
-                            vec![PromSample::new(
-                                vec![
-                                    PromLabel::new("cpu", i.to_string()),
-                                    PromLabel::new("mode", "softirq".to_string()),
-                                ],
-                                softirq as f64,
-                                None,
-                            )]
-                        },
-                    ))
-                    .chain(cpu.steal.map_or_else(
-                        || Vec::new(),
-                        |steal| {
-                            vec![PromSample::new(
-                                vec![
-                                    PromLabel::new("cpu", i.to_string()),
-                                    PromLabel::new("mode", "steal".to_string()),
-                                ],
-                                steal as f64,
-                                None,
-                            )]
-                        },
-                    ))
+                    .chain(cpu.iowait.map_or_else(Vec::new, |iowait| {
+                        vec![PromSample::new(
+                            vec![
+                                PromLabel::new("cpu", i.to_string()),
+                                PromLabel::new("mode", "iowait".to_string()),
+                            ],
+                            iowait as f64,
+                            None,
+                        )]
+                    }))
+                    .chain(cpu.irq.map_or_else(Vec::new, |irq| {
+                        vec![PromSample::new(
+                            vec![
+                                PromLabel::new("cpu", i.to_string()),
+                                PromLabel::new("mode", "irq".to_string()),
+                            ],
+                            irq as f64,
+                            None,
+                        )]
+                    }))
+                    .chain(cpu.softirq.map_or_else(Vec::new, |softirq| {
+                        vec![PromSample::new(
+                            vec![
+                                PromLabel::new("cpu", i.to_string()),
+                                PromLabel::new("mode", "softirq".to_string()),
+                            ],
+                            softirq as f64,
+                            None,
+                        )]
+                    }))
+                    .chain(cpu.steal.map_or_else(Vec::new, |steal| {
+                        vec![PromSample::new(
+                            vec![
+                                PromLabel::new("cpu", i.to_string()),
+                                PromLabel::new("mode", "steal".to_string()),
+                            ],
+                            steal as f64,
+                            None,
+                        )]
+                    }))
                     .collect::<Vec<PromSample>>()
                 })
                 .flatten()

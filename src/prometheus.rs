@@ -8,10 +8,10 @@ impl PromResponse {
         PromResponse { metrics }
     }
 
-    pub fn to_string(&self) -> String {
+    pub fn to_prom(&self) -> String {
         self.metrics
             .iter()
-            .map(|metric| metric.to_string())
+            .map(|metric| metric.to_prom())
             .collect::<Vec<String>>()
             .join("\n")
     }
@@ -50,7 +50,7 @@ impl PromMetric {
         }
     }
 
-    pub fn to_string(&self) -> String {
+    pub fn to_prom(&self) -> String {
         format!(
             "# HELP {} {}\n# TYPE {} {}\n{}",
             self.name,
@@ -59,7 +59,7 @@ impl PromMetric {
             format!("{:?}", self.typ).to_lowercase(),
             self.samples
                 .iter()
-                .map(|sample| sample.to_string(self.name.clone()))
+                .map(|sample| sample.to_prom(self.name.clone()))
                 .collect::<Vec<String>>()
                 .join("\n")
         )
@@ -82,13 +82,13 @@ impl PromSample {
         }
     }
 
-    pub fn to_string(&self, name: String) -> String {
+    pub fn to_prom(&self, name: String) -> String {
         format!(
             "{}{{{}}} {}{}",
             name,
             self.labels
                 .iter()
-                .map(|label| label.to_string())
+                .map(|label| label.to_prom())
                 .collect::<Vec<String>>()
                 .join(","),
             self.value.to_string(),
@@ -112,7 +112,7 @@ impl PromLabel {
         }
     }
 
-    pub fn to_string(&self) -> String {
+    pub fn to_prom(&self) -> String {
         format!("{}=\"{}\"", self.name, self.value)
     }
 }
@@ -125,25 +125,25 @@ mod test {
     #[test]
     fn test__PromLabel__to_string() {
         let label = PromLabel::new("foo", "bar".to_string());
-        assert_eq!(label.to_string(), "foo=\"bar\"")
+        assert_eq!(label.to_prom(), "foo=\"bar\"")
     }
 
     #[test]
     fn test__PromSample__to_string__no_labels_no_timestamp() {
         let sample = PromSample::new(vec![], 4.5, None);
-        assert_eq!(sample.to_string("baz".to_string()), "baz{} 4.5")
+        assert_eq!(sample.to_prom("baz".to_string()), "baz{} 4.5")
     }
 
     #[test]
     fn test__PromSample__to_string__no_labels_with_timestamp() {
         let sample = PromSample::new(vec![], 4.5, Some(12345));
-        assert_eq!(sample.to_string("baz".to_string()), "baz{} 4.5 12345")
+        assert_eq!(sample.to_prom("baz".to_string()), "baz{} 4.5 12345")
     }
 
     #[test]
     fn test__PromSample__to_string__one_label_no_timestamp() {
         let sample = PromSample::new(vec![PromLabel::new("foo", "bar".to_string())], 4.5, None);
-        assert_eq!(sample.to_string("baz".to_string()), "baz{foo=\"bar\"} 4.5")
+        assert_eq!(sample.to_prom("baz".to_string()), "baz{foo=\"bar\"} 4.5")
     }
 
     #[test]
@@ -157,7 +157,7 @@ mod test {
             None,
         );
         assert_eq!(
-            sample.to_string("baz".to_string()),
+            sample.to_prom("baz".to_string()),
             "baz{foo=\"bar\",go=\"bucks\"} 4.5"
         )
     }
@@ -166,7 +166,7 @@ mod test {
     fn test__PromMetric__to_string__no_samples() {
         let metric = PromMetric::new("baz", "A funny value", PromMetricType::Counter, vec![]);
         assert_eq!(
-            metric.to_string(),
+            metric.to_prom(),
             "# HELP baz A funny value\n# TYPE baz counter\n"
         )
     }
@@ -184,7 +184,7 @@ mod test {
             )],
         );
         assert_eq!(
-            metric.to_string(),
+            metric.to_prom(),
             "# HELP baz A funny value\n# TYPE baz counter\nbaz{foo=\"bar\"} 4.5"
         )
     }
@@ -201,7 +201,7 @@ mod test {
             ],
         );
         assert_eq!(
-            metric.to_string(),
+            metric.to_prom(),
             "# HELP baz A funny value\n# TYPE baz counter\nbaz{foo=\"bar\"} 4.5\nbaz{} 4.5 12345"
         )
     }
@@ -209,7 +209,7 @@ mod test {
     #[test]
     fn test__PromResponse__to_string__no_metrics() {
         let response = PromResponse::new(vec![]);
-        assert_eq!(response.to_string(), "")
+        assert_eq!(response.to_prom(), "")
     }
 
     #[test]
@@ -225,7 +225,7 @@ mod test {
             )],
         )]);
         assert_eq!(
-            response.to_string(),
+            response.to_prom(),
             "# HELP baz A funny value\n# TYPE baz counter\nbaz{foo=\"bar\"} 4.5"
         )
     }
@@ -255,7 +255,7 @@ mod test {
             ),
         ]);
         assert_eq!(
-            response.to_string(),
+            response.to_prom(),
             "# HELP baz A funny value\n# TYPE baz counter\nbaz{foo=\"bar\"} 4.5\n# HELP spam A silly value\n# TYPE spam counter\nspam{bar=\"foo\"} 5.4"
         )
     }
