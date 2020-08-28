@@ -71,6 +71,7 @@ jobs:
           key: ${{ runner.os }}-armv7-cargo-${{ hashFiles('**/Cargo.lock') }}
       - run: |
           docker build .github/docker -f .github/docker/Dockerfile.armv7 -t cross-armv7:latest
+      - uses: satackey/action-docker-layer-caching@v0.0.8
       - uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
