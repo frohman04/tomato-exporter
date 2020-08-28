@@ -68,13 +68,11 @@ impl TomatoClient {
                 .map(|scraper| TomatoClient::run_scraper(scraper.as_ref())),
         )
         .await
-        .into_iter()
-        .collect::<Vec<ScraperResult>>();
+        .into_iter();
 
         let mut scraper_durations: Vec<PromSample> = Vec::new();
         let mut scraper_successes: Vec<PromSample> = Vec::new();
         let mut metrics: Vec<PromMetric> = results
-            .into_iter()
             .filter_map(|result| {
                 scraper_durations.push(PromSample::new(
                     vec![PromLabel::new("collector", result.name.clone())],
