@@ -43,6 +43,8 @@ jobs:
     - uses: actions-rs/toolchain@v1
       with:
         toolchain: stable
+        profile: minimal
+        override: true
     - uses: actions-rs/cargo@v1
       with:
         command: test
@@ -69,6 +71,7 @@ jobs:
       - uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
+          profile: minimal
           target: armv7-unknown-linux-gnueabihf
           override: true
       - uses: actions-rs/cargo@v1
@@ -78,4 +81,4 @@ jobs:
         with:
           use-cross: true
           command: build
-          args: --target armv7-unknown-linux-gnueabihf --release
+          args: --release
