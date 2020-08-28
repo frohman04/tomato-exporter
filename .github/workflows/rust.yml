@@ -46,10 +46,12 @@ jobs:
         toolchain: stable
         profile: minimal
         override: true
-    - uses: actions-rs/cargo@v1
+    - name: test
+      uses: actions-rs/cargo@v1
       with:
         command: test
-    - uses: actions-rs/cargo@v1
+    - name: build_release
+      uses: actions-rs/cargo@v1
       with:
         command: build
         args: --release
@@ -75,10 +77,12 @@ jobs:
           profile: minimal
           target: armv7-unknown-linux-gnueabihf
           override: true
-      - uses: actions-rs/cargo@v1
+      - name: test
+        uses: actions-rs/cargo@v1
         with:
           command: test
-      - uses: actions-rs/cargo@v1
+      - name: build_release
+        uses: actions-rs/cargo@v1
         with:
           use-cross: true
           command: build
