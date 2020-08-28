@@ -17,6 +17,6 @@ pub async fn metrics(data: web::Data<WebState>) -> Result<String, error::Error> 
     data.client
         .get_metrics()
         .await
-        .map(|resp| resp.to_string())
+        .map(|resp| resp.to_prom())
         .map_err(|err| error::ErrorInternalServerError(err))
 }
