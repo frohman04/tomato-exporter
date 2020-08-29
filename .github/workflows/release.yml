@@ -1,0 +1,76 @@
+on:
+  push:
+    tags:
+      - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
+
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/cache@v2
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-release-cargo-${{ hashFiles('**/Cargo.lock') }}
+      - name: "x86_64: install_toolchain"
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          profile: minimal
+          override: true
+
+      # test everything before generating release artifacts
+      - name: test
+        uses: actions-rs/cargo@v1
+        with:
+          command: test
+
+      - name: get_release_version
+        id: get_version
+        run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
+
+      # release x86_64
+      - name: "x86_64: build_release"
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --release
+      - name: "x86_64: build_bundle"
+        run: |
+          tar -czf tomato-exporter-${{ steps.get_version.outputs.VERSION }}.x86_64.tar.gz -C ./target/release/ tomato-exporter
+
+      # release ARMv7
+      - name: "armv7: build_env:"
+        run: |
+          docker build .github/docker -f .github/docker/Dockerfile.armv7 -t cross-armv7:latest
+      - name: "armv7: install_toolchain"
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          profile: minimal
+          target: armv7-unknown-linux-gnueabihf
+          override: true
+      - name: "armv7: build_release"
+        run: |
+          cargo install cross
+          cross build --target armv7-unknown-linux-gnueabihf --release
+      - name: "armv7: build_bundle"
+        run: |
+          tar -czf tomato-exporter-${{ steps.get_version.outputs.VERSION }}.armv7.tar.gz -C ./target/armv7-unknown-linux-gnueabihf/release/ tomato-exporter
+
+      # create GitHub release and attach artifacts
+      - name: create_github_release
+        uses: softprops/action-gh-release@v1
+        with:
+          name: Release ${{ steps.get_version.outputs.VERSION }}
+          body: ""
+          files: |
+            tomato-exporter-${{ steps.get_version.outputs.VERSION }}.x86_64.tar.gz
+            tomato-exporter-${{ steps.get_version.outputs.VERSION }}.armv7.tar.gz
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
