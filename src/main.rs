@@ -1,3 +1,5 @@
+#![forbid(unsafe_code)]
+
 extern crate actix_web;
 #[macro_use]
 extern crate async_trait;
@@ -21,6 +23,7 @@ mod web;
 
 use actix_web::middleware::{Compress, Logger};
 use actix_web::{web as a_web, App, HttpServer};
+use clap::{crate_name, crate_version};
 use simplelog::{CombinedLogger, Config, LevelFilter, TermLogger, TerminalMode};
 
 use web::{metrics, WebState};
@@ -37,7 +40,7 @@ async fn main() -> std::io::Result<()> {
     .unwrap();
 
     let matches = clap::App::new("tomato_exporter")
-        .version("0.1")
+        .version(crate_version!())
         .author("Chris Lieb")
         .arg(
             clap::Arg::with_name("conf")
@@ -46,6 +49,8 @@ async fn main() -> std::io::Result<()> {
                 .default_value("conf.yaml"),
         )
         .get_matches();
+
+    info!("Starting {} v{}", crate_name!(), crate_version!());
 
     let conf = config::load_conf(matches.value_of("conf").unwrap().to_string());
     let client = conf
