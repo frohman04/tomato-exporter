@@ -80,11 +80,19 @@ impl TomatoClient {
                     None,
                 ));
                 scraper_successes.push(PromSample::new(
-                    vec![PromLabel::new("collector", result.name)],
+                    vec![PromLabel::new("collector", result.name.clone())],
                     if result.result.is_ok() { 1f64 } else { 0f64 },
                     None,
                 ));
-                result.result.ok()
+
+                let name = result.name.clone();
+                result
+                    .result
+                    .map_err(|err| {
+                        warn!("Scraper {} failed: {}", name, err);
+                        err
+                    })
+                    .ok()
             })
             .flatten()
             .collect();
