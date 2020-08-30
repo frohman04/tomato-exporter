@@ -1,0 +1,10 @@
+ip: "0.0.0.0" # the interface to host the service on
+port: 8080 # the port to host the service on
+slug: metrics # accessible {host}:{port}/metrics
+
+router_ip: "192.168.1.1"
+admin_username: admin
+admin_password: password123
+# the http_id. see here to learn how to get it:
+# https://www.home-assistant.io/integrations/tomato/
+http_id: TIDcf40d0bd0eba4ba0
