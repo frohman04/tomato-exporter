@@ -50,21 +50,30 @@ async fn main() -> std::io::Result<()> {
         )
         .get_matches();
 
-    info!("Starting {} v{}", crate_name!(), crate_version!());
-
     let conf = config::load_conf(matches.value_of("conf").unwrap().to_string());
-    let client = conf
-        .modules
-        .mod_bandwidth
-        .map(|c| TomatoClient::new(c.router_ip, c.admin_username, c.admin_password, c.http_id))
-        .expect("Must define mod_bandwidth configuration");
+    info!(
+        "Starting {} v{}: http://{}:{}/{}",
+        crate_name!(),
+        crate_version!(),
+        conf.ip,
+        conf.port,
+        conf.slug
+    );
 
+    let client = TomatoClient::new(
+        conf.router_ip,
+        conf.admin_username,
+        conf.admin_password,
+        conf.http_id,
+    );
+
+    let path = format!("/{}", conf.slug.clone());
     HttpServer::new(move || {
         App::new()
             .wrap(Logger::default())
             .wrap(Compress::default())
             .data(WebState::new(client.clone()))
-            .route("/metrics", a_web::get().to(metrics))
+            .route(path.as_str(), a_web::get().to(metrics))
     })
     .bind(format!("{}:{}", conf.ip, conf.port))?
     .run()
