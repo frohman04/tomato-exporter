@@ -12,16 +12,6 @@ pub fn load_conf(path: String) -> Config {
 pub struct Config {
     pub ip: String,
     pub port: u16,
-    pub modules: Modules,
-}
-
-#[derive(Debug, PartialEq, Deserialize)]
-pub struct Modules {
-    pub mod_bandwidth: Option<ModBandwidth>,
-}
-
-#[derive(Debug, PartialEq, Deserialize)]
-pub struct ModBandwidth {
     pub slug: String,
     pub router_ip: String,
     pub admin_username: String,
