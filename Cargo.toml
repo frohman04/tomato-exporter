@@ -1,6 +1,6 @@
 [package]
 name = "tomato-exporter"
-version = "0.8.3"
+version = "0.8.4"
 authors = ["Christopher Lieb <chris.lieb@gmail.com>"]
 license = "MIT OR Apache-2.0"
 edition = "2018"
