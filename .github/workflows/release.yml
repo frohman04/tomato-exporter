@@ -84,9 +84,6 @@ jobs:
             ~/.cargo/git
             target
           key: ${{ runner.os }}-release-armv7-cargo-${{ hashFiles('**/Cargo.lock') }}
-      - name: "armv7: build_env"
-        run: |
-          docker build .github/docker -f .github/docker/Dockerfile.armv7 -t cross-armv7:latest
       - name: "armv7: install_toolchain"
         uses: actions-rs/toolchain@v1
         with:
