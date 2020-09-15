@@ -4,6 +4,7 @@ extern crate actix_web;
 #[macro_use]
 extern crate async_trait;
 extern crate clap;
+extern crate derive_more;
 extern crate dyn_clone;
 extern crate futures;
 #[macro_use]
@@ -11,7 +12,6 @@ extern crate log;
 #[macro_use]
 extern crate maplit;
 extern crate regex;
-extern crate reqwest;
 extern crate serde_yaml;
 extern crate simplelog;
 extern crate url;

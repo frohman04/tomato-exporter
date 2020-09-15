@@ -1,6 +1,6 @@
 use regex::Regex;
 
-use crate::client::{Scraper, TomatoClientInternal};
+use crate::client::{Scraper, TomatoClientError, TomatoClientInternal};
 use crate::prometheus::{PromMetric, PromMetricType, PromSample};
 
 #[derive(Clone)]
@@ -19,7 +19,7 @@ impl TimeClient {
         TimeClient { client }
     }
 
-    async fn get_time(&self) -> Result<Times, reqwest::Error> {
+    async fn get_time(&self) -> Result<Times, TomatoClientError> {
         let body = self
             .client
             .run_command("date +%s && cat /proc/uptime".to_string())
@@ -82,7 +82,7 @@ impl TimeClient {
 
 #[async_trait]
 impl Scraper for TimeClient {
-    async fn get_metrics(&self) -> Result<Vec<PromMetric>, reqwest::Error> {
+    async fn get_metrics(&self) -> Result<Vec<PromMetric>, TomatoClientError> {
         let raw_metrics = self.get_time().await?;
         Ok(TimeClient::raw_to_prom(raw_metrics))
     }

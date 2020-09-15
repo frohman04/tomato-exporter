@@ -8,9 +8,10 @@ mod uname;
 use std::collections::HashMap;
 
 use ::time::OffsetDateTime;
+use actix_web::client::Client;
+use derive_more::{Display, From};
 use dyn_clone::DynClone;
 use futures::future::join_all;
-use reqwest::{Client, ClientBuilder};
 use url::form_urlencoded;
 
 use crate::client::cpu::CpuClient;
@@ -23,7 +24,7 @@ use crate::prometheus::{PromLabel, PromMetric, PromMetricType, PromResponse, Pro
 
 #[async_trait]
 trait Scraper: DynClone + Send {
-    async fn get_metrics(&self) -> Result<Vec<PromMetric>, reqwest::Error>;
+    async fn get_metrics(&self) -> Result<Vec<PromMetric>, TomatoClientError>;
 
     fn get_name(&self) -> String;
 }
@@ -33,7 +34,7 @@ dyn_clone::clone_trait_object!(Scraper);
 struct ScraperResult {
     pub name: String,
     pub duration: f64,
-    pub result: Result<Vec<PromMetric>, reqwest::Error>,
+    pub result: Result<Vec<PromMetric>, TomatoClientError>,
 }
 
 #[derive(Clone)]
@@ -61,7 +62,7 @@ impl TomatoClient {
         }
     }
 
-    pub async fn get_metrics(&self) -> Result<PromResponse, reqwest::Error> {
+    pub async fn get_metrics(&self) -> Result<PromResponse, TomatoClientError> {
         let results = join_all(
             self.data_clients
                 .iter()
@@ -131,7 +132,6 @@ pub struct TomatoClientInternal {
     admin_username: String,
     admin_password: String,
     http_id: String,
-    client: Client,
 }
 
 impl TomatoClientInternal {
@@ -147,9 +147,6 @@ impl TomatoClientInternal {
             admin_username,
             admin_password,
             http_id,
-            client: ClientBuilder::new()
-                .build()
-                .expect("Unable to construct HTTP client"),
         }
     }
 
@@ -157,7 +154,7 @@ impl TomatoClientInternal {
         &self,
         endpoint: String,
         args: Option<HashMap<String, String>>,
-    ) -> Result<String, reqwest::Error> {
+    ) -> Result<String, TomatoClientError> {
         let arg_map = args.unwrap_or_else(HashMap::new);
         let body = arg_map
             .into_iter()
@@ -168,20 +165,22 @@ impl TomatoClientInternal {
             )
             .finish();
 
-        let response = self
-            .client
-            .post(format!("{}/{}", &self.hostname.clone(), endpoint).as_str())
-            .basic_auth(
-                self.admin_username.clone(),
-                Some(self.admin_password.clone()),
-            )
-            .body(body)
-            .send()
-            .await?;
-        Ok(response.text().await?)
+        let body = {
+            let client = Client::default();
+            let mut response = client
+                .post(format!("{}/{}", &self.hostname.clone(), endpoint).as_str())
+                .basic_auth(
+                    self.admin_username.clone(),
+                    Some(self.admin_password.clone().as_str()),
+                )
+                .send_body(body)
+                .await?;
+            response.body().await?
+        };
+        Ok(std::str::from_utf8(body.as_ref()).unwrap().to_string())
     }
 
-    async fn run_command(&self, command: String) -> Result<String, reqwest::Error> {
+    async fn run_command(&self, command: String) -> Result<String, TomatoClientError> {
         self.make_request(
             "shell.cgi".to_string(),
             Some(hashmap! {
@@ -193,4 +192,10 @@ impl TomatoClientInternal {
         )
         .await
     }
+}
+
+#[derive(Debug, Display, From)]
+pub enum TomatoClientError {
+    SendError(actix_web::client::SendRequestError),
+    PayloadError(actix_web::error::PayloadError),
 }

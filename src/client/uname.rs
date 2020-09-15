@@ -1,6 +1,6 @@
 use regex::Regex;
 
-use crate::client::{Scraper, TomatoClientInternal};
+use crate::client::{Scraper, TomatoClientError, TomatoClientInternal};
 use crate::prometheus::{PromLabel, PromMetric, PromMetricType, PromSample};
 
 #[derive(Clone)]
@@ -23,7 +23,7 @@ impl UnameClient {
         UnameClient { client }
     }
 
-    async fn get_uname(&self) -> Result<Uname, reqwest::Error> {
+    async fn get_uname(&self) -> Result<Uname, TomatoClientError> {
         let body = self.client.run_command("uname -a".to_string()).await?;
         Ok(UnameClient::parse_body(body))
     }
@@ -69,7 +69,7 @@ impl UnameClient {
 
 #[async_trait]
 impl Scraper for UnameClient {
-    async fn get_metrics(&self) -> Result<Vec<PromMetric>, reqwest::Error> {
+    async fn get_metrics(&self) -> Result<Vec<PromMetric>, TomatoClientError> {
         let raw_metrics = self.get_uname().await?;
         Ok(UnameClient::raw_to_prom(raw_metrics))
     }
