@@ -4,7 +4,6 @@ extern crate actix_web;
 #[macro_use]
 extern crate async_trait;
 extern crate clap;
-extern crate derive_more;
 extern crate dyn_clone;
 extern crate futures;
 #[macro_use]

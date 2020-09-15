@@ -2,7 +2,7 @@ use std::collections::BTreeMap;
 
 use regex::Regex;
 
-use crate::client::{Scraper, TomatoClientError, TomatoClientInternal};
+use crate::client::{Scraper, TomatoClientInternal};
 use crate::prometheus::{PromLabel, PromMetric, PromMetricType, PromSample};
 
 #[derive(Clone)]
@@ -27,7 +27,7 @@ impl CpuClient {
         CpuClient { client }
     }
 
-    async fn get_cpu(&self) -> Result<BTreeMap<u8, CpuStats>, TomatoClientError> {
+    async fn get_cpu(&self) -> Result<BTreeMap<u8, CpuStats>, Box<dyn std::error::Error>> {
         let body = self
             .client
             .run_command("cat /proc/stat".to_string())
@@ -170,7 +170,7 @@ impl CpuClient {
 
 #[async_trait]
 impl Scraper for CpuClient {
-    async fn get_metrics(&self) -> Result<Vec<PromMetric>, TomatoClientError> {
+    async fn get_metrics(&self) -> Result<Vec<PromMetric>, Box<dyn std::error::Error>> {
         let raw_metrics = self.get_cpu().await?;
         Ok(CpuClient::raw_to_prom(raw_metrics))
     }

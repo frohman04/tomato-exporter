@@ -9,7 +9,6 @@ use std::collections::HashMap;
 
 use ::time::OffsetDateTime;
 use actix_web::client::Client;
-use derive_more::{Display, From};
 use dyn_clone::DynClone;
 use futures::future::join_all;
 use url::form_urlencoded;
@@ -24,7 +23,7 @@ use crate::prometheus::{PromLabel, PromMetric, PromMetricType, PromResponse, Pro
 
 #[async_trait]
 trait Scraper: DynClone + Send {
-    async fn get_metrics(&self) -> Result<Vec<PromMetric>, TomatoClientError>;
+    async fn get_metrics(&self) -> Result<Vec<PromMetric>, Box<dyn std::error::Error>>;
 
     fn get_name(&self) -> String;
 }
@@ -34,7 +33,7 @@ dyn_clone::clone_trait_object!(Scraper);
 struct ScraperResult {
     pub name: String,
     pub duration: f64,
-    pub result: Result<Vec<PromMetric>, TomatoClientError>,
+    pub result: Result<Vec<PromMetric>, Box<dyn std::error::Error>>,
 }
 
 #[derive(Clone)]
@@ -62,7 +61,7 @@ impl TomatoClient {
         }
     }
 
-    pub async fn get_metrics(&self) -> Result<PromResponse, TomatoClientError> {
+    pub async fn get_metrics(&self) -> Result<PromResponse, Box<dyn std::error::Error>> {
         let results = join_all(
             self.data_clients
                 .iter()
@@ -154,7 +153,7 @@ impl TomatoClientInternal {
         &self,
         endpoint: String,
         args: Option<HashMap<String, String>>,
-    ) -> Result<String, TomatoClientError> {
+    ) -> Result<String, Box<dyn std::error::Error>> {
         let arg_map = args.unwrap_or_else(HashMap::new);
         let body = arg_map
             .into_iter()
@@ -180,7 +179,7 @@ impl TomatoClientInternal {
         Ok(std::str::from_utf8(body.as_ref()).unwrap().to_string())
     }
 
-    async fn run_command(&self, command: String) -> Result<String, TomatoClientError> {
+    async fn run_command(&self, command: String) -> Result<String, Box<dyn std::error::Error>> {
         self.make_request(
             "shell.cgi".to_string(),
             Some(hashmap! {
@@ -192,10 +191,4 @@ impl TomatoClientInternal {
         )
         .await
     }
-}
-
-#[derive(Debug, Display, From)]
-pub enum TomatoClientError {
-    SendError(actix_web::client::SendRequestError),
-    PayloadError(actix_web::error::PayloadError),
 }
