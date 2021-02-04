@@ -12,7 +12,7 @@ dependencies = [
  "futures-sink",
  "log",
  "pin-project 0.4.27",
- "tokio 0.2.24",
+ "tokio",
  "tokio-util",
 ]
 
@@ -23,7 +23,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "177837a10863f15ba8d3ae3ec12fac1099099529ed20083a27fdfe247381d0dc"
 dependencies = [
  "actix-codec",
- "actix-rt 1.1.1",
+ "actix-rt",
  "actix-service",
  "actix-utils",
  "derive_more",
@@ -43,7 +43,7 @@ checksum = "452299e87817ae5673910e53c243484ca38be3828db819b6011736fc6982e874"
 dependencies = [
  "actix-codec",
  "actix-connect",
- "actix-rt 1.1.1",
+ "actix-rt",
  "actix-service",
  "actix-threadpool",
  "actix-utils",
@@ -93,16 +93,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "actix-macros"
-version = "0.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "dbcb2b608f0accc2f5bcf3dd872194ce13d94ee45b571487035864cf966b04ef"
-dependencies = [
- "quote",
- "syn",
-]
-
-[[package]]
 name = "actix-router"
 version = "0.2.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -121,24 +111,13 @@ version = "1.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "143fcc2912e0d1de2bcf4e2f720d2a60c28652ab4179685a1ee159e0fb3db227"
 dependencies = [
- "actix-macros 0.1.3",
+ "actix-macros",
  "actix-threadpool",
  "copyless",
  "futures-channel",
  "futures-util",
  "smallvec",
- "tokio 0.2.24",
-]
-
-[[package]]
-name = "actix-rt"
-version = "2.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b1383863521ba9c31eafb2d88f57416fb9f13ed9a86081cd07bdef9b19775926"
-dependencies = [
- "actix-macros 0.2.0",
- "futures-core",
- "tokio 1.1.1",
+ "tokio",
 ]
 
 [[package]]
@@ -148,13 +127,13 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "45407e6e672ca24784baa667c5d32ef109ccdd8d5e0b5ebb9ef8a67f4dfb708e"
 dependencies = [
  "actix-codec",
- "actix-rt 1.1.1",
+ "actix-rt",
  "actix-service",
  "actix-utils",
  "futures-channel",
  "futures-util",
  "log",
- "mio 0.6.23",
+ "mio",
  "mio-uds",
  "num_cpus",
  "slab",
@@ -177,8 +156,8 @@ version = "1.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "47239ca38799ab74ee6a8a94d1ce857014b2ac36f242f70f3f75a66f691e791c"
 dependencies = [
- "actix-macros 0.1.3",
- "actix-rt 1.1.1",
+ "actix-macros",
+ "actix-rt",
  "actix-server",
  "actix-service",
  "log",
@@ -219,7 +198,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2e9022dec56632d1d7979e59af14f0597a28a830a9c1c7fec8b2327eb9f16b5a"
 dependencies = [
  "actix-codec",
- "actix-rt 1.1.1",
+ "actix-rt",
  "actix-service",
  "bitflags",
  "bytes",
@@ -240,9 +219,9 @@ checksum = "e641d4a172e7faa0862241a20ff4f1f5ab0ab7c279f00c2d4587b77483477b86"
 dependencies = [
  "actix-codec",
  "actix-http",
- "actix-macros 0.1.3",
+ "actix-macros",
  "actix-router",
- "actix-rt 1.1.1",
+ "actix-rt",
  "actix-server",
  "actix-service",
  "actix-testing",
@@ -351,7 +330,7 @@ checksum = "b381e490e7b0cfc37ebc54079b0413d8093ef43d14a4e4747083f7fa47a9e691"
 dependencies = [
  "actix-codec",
  "actix-http",
- "actix-rt 1.1.1",
+ "actix-rt",
  "actix-service",
  "base64 0.13.0",
  "bytes",
@@ -799,7 +778,7 @@ dependencies = [
  "http",
  "indexmap",
  "slab",
- "tokio 0.2.24",
+ "tokio",
  "tokio-util",
  "tracing",
  "tracing-futures",
@@ -891,7 +870,7 @@ dependencies = [
  "itoa",
  "pin-project 1.0.2",
  "socket2",
- "tokio 0.2.24",
+ "tokio",
  "tower-service",
  "tracing",
  "want",
@@ -908,7 +887,7 @@ dependencies = [
  "hyper",
  "log",
  "rustls",
- "tokio 0.2.24",
+ "tokio",
  "tokio-rustls",
  "webpki",
 ]
@@ -1109,23 +1088,10 @@ dependencies = [
  "kernel32-sys",
  "libc",
  "log",
- "miow 0.2.2",
+ "miow",
  "net2",
  "slab",
  "winapi 0.2.8",
-]
-
-[[package]]
-name = "mio"
-version = "0.7.7"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e50ae3f04d169fcc9bde0b547d1c205219b7157e07ded9c5aff03e0637cb3ed7"
-dependencies = [
- "libc",
- "log",
- "miow 0.3.6",
- "ntapi",
- "winapi 0.3.9",
 ]
 
 [[package]]
@@ -1136,7 +1102,7 @@ checksum = "afcb699eb26d4332647cc848492bbc15eafb26f08d0304550d5aa1f612e066f0"
 dependencies = [
  "iovec",
  "libc",
- "mio 0.6.23",
+ "mio",
 ]
 
 [[package]]
@@ -1152,16 +1118,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "miow"
-version = "0.3.6"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5a33c1b55807fbed163481b5ba66db4b2fa6cde694a5027be10fb724206c5897"
-dependencies = [
- "socket2",
- "winapi 0.3.9",
-]
-
-[[package]]
 name = "net2"
 version = "0.2.37"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1169,15 +1125,6 @@ checksum = "391630d12b68002ae1e25e8f974306474966550ad82dac6886fb8910c19568ae"
 dependencies = [
  "cfg-if 0.1.10",
  "libc",
- "winapi 0.3.9",
-]
-
-[[package]]
-name = "ntapi"
-version = "0.3.6"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3f6bb902e437b6d86e03cce10a7e2af662292c5dfef23b65899ea3ac9354ad44"
-dependencies = [
  "winapi 0.3.9",
 ]
 
@@ -1450,7 +1397,7 @@ dependencies = [
  "rustls",
  "serde",
  "serde_urlencoded",
- "tokio 0.2.24",
+ "tokio",
  "tokio-rustls",
  "url",
  "wasm-bindgen",
@@ -1881,27 +1828,11 @@ dependencies = [
  "lazy_static",
  "libc",
  "memchr",
- "mio 0.6.23",
+ "mio",
  "mio-uds",
  "pin-project-lite 0.1.11",
  "signal-hook-registry",
  "slab",
- "winapi 0.3.9",
-]
-
-[[package]]
-name = "tokio"
-version = "1.1.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6714d663090b6b0acb0fa85841c6d66233d150cdb2602c8f9b8abb03370beb3f"
-dependencies = [
- "autocfg",
- "libc",
- "mio 0.7.7",
- "once_cell",
- "parking_lot",
- "pin-project-lite 0.2.4",
- "signal-hook-registry",
  "winapi 0.3.9",
 ]
 
@@ -1913,7 +1844,7 @@ checksum = "e12831b255bcfa39dc0436b01e19fea231a37db570686c06ee72c423479f889a"
 dependencies = [
  "futures-core",
  "rustls",
- "tokio 0.2.24",
+ "tokio",
  "webpki",
 ]
 
@@ -1928,14 +1859,14 @@ dependencies = [
  "futures-sink",
  "log",
  "pin-project-lite 0.1.11",
- "tokio 0.2.24",
+ "tokio",
 ]
 
 [[package]]
 name = "tomato-exporter"
 version = "0.8.6"
 dependencies = [
- "actix-rt 2.0.0",
+ "actix-rt",
  "actix-web",
  "async-trait",
  "clap",
@@ -2005,7 +1936,7 @@ dependencies = [
  "rand",
  "smallvec",
  "thiserror",
- "tokio 0.2.24",
+ "tokio",
  "url",
 ]
 
@@ -2025,7 +1956,7 @@ dependencies = [
  "resolv-conf",
  "smallvec",
  "thiserror",
- "tokio 0.2.24",
+ "tokio",
  "trust-dns-proto",
 ]
 
