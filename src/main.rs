@@ -24,7 +24,7 @@ mod web;
 use actix_web::middleware::{Compress, Logger};
 use actix_web::{web as a_web, App, HttpServer};
 use clap::{crate_name, crate_version};
-use simplelog::{CombinedLogger, Config, LevelFilter, TermLogger, TerminalMode};
+use simplelog::{ColorChoice, CombinedLogger, Config, LevelFilter, TermLogger, TerminalMode};
 
 use web::{metrics, WebState};
 
@@ -36,6 +36,7 @@ async fn main() -> std::io::Result<()> {
         LevelFilter::Info,
         Config::default(),
         TerminalMode::Stderr,
+        ColorChoice::Auto,
     )])
     .unwrap();
 
