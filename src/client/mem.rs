@@ -29,7 +29,13 @@ impl MemClient {
             .captures_iter(body.as_str().trim())
             .map(|capture| {
                 (
-                    capture.name("name").unwrap().as_str().to_string(),
+                    capture
+                        .name("name")
+                        .unwrap()
+                        .as_str()
+                        .to_string()
+                        .replace("(", "_")
+                        .replace(")", ""),
                     capture
                         .name("val_kB")
                         .unwrap()

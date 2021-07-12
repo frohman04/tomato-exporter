@@ -1833,7 +1833,7 @@ dependencies = [
 
 [[package]]
 name = "tomato-exporter"
-version = "0.9.0"
+version = "0.9.1"
 dependencies = [
  "actix-rt",
  "actix-web",
