@@ -38,7 +38,7 @@ impl CpuClient {
     fn parse_body(body: String) -> BTreeMap<u8, CpuStats> {
         let cpu_re = Regex::new(r"cpu(?P<cpu>[0-9]+) (?P<jiffies>.*)").unwrap();
         cpu_re
-            .captures_iter(body.as_str())
+            .captures_iter(body.as_str().trim())
             .map(|raw_cpu| {
                 let cpu_id = raw_cpu.name("cpu").unwrap().as_str().parse::<u8>().unwrap();
                 let jiffies: Vec<u32> = raw_cpu

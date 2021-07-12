@@ -32,7 +32,7 @@ impl TimeClient {
             Regex::new(r"(?s)(?P<timestamp>[0-9]+)\n(?P<up_seconds>[0-9]+\.[0-9]+) [0-9]+\.[0-9]+")
                 .unwrap();
         body_parser_re
-            .captures(body.as_str())
+            .captures(body.as_str().trim())
             .map(|capture| {
                 let curr_timestamp = capture
                     .name("timestamp")

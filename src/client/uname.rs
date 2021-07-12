@@ -30,11 +30,11 @@ impl UnameClient {
 
     fn parse_body(body: String) -> Uname {
         let uname_re = Regex::new(
-            r"(?P<sysname>[a-zA-Z]+) (?P<nodename>[a-zA-Z0-9-_]+) (?P<release>[0-9.-a-z]+) (?P<version>.*) (?P<machine>[a-zA-Z0-9-_]+) ([a-zA-Z0-9]+)",
+            r"^(?P<sysname>[a-zA-Z]+) (?P<nodename>[a-zA-Z0-9_-]+) (?P<release>[0-9a-z._]+) (?P<version>.+) (?P<machine>[a-zA-Z0-9_-]+) [a-zA-Z0-9]+$",
         )
         .unwrap();
         uname_re
-            .captures(body.as_str())
+            .captures(body.as_str().trim())
             .map(|caps| Uname {
                 domainname: "(none)".to_string(),
                 machine: caps.name("machine").unwrap().as_str().to_string(),
@@ -87,15 +87,15 @@ mod test {
     fn test_parse_body() {
         assert_eq!(
             UnameClient::parse_body(
-                "Linux karabor 2.6.22.19 #31 Thu Jul 16 01:30:27 CEST 2020 mips Tomato".to_string()
+                "Linux karabor 2.6.36.4brcmarm #19 SMP PREEMPT Sat Jun 5 15:55:45 CEST 2021 armv7l Tomato".to_string()
             ),
             Uname {
                 domainname: "(none)".to_string(),
-                machine: "mips".to_string(),
+                machine: "armv7l".to_string(),
                 nodename: "karabor".to_string(),
-                release: "2.6.22.19".to_string(),
+                release: "2.6.36.4brcmarm".to_string(),
                 sysname: "Linux".to_string(),
-                version: "#31 Thu Jul 16 01:30:27 CEST 2020".to_string(),
+                version: "#19 SMP PREEMPT Sat Jun 5 15:55:45 CEST 2021".to_string(),
             }
         )
     }

@@ -56,7 +56,7 @@ impl NetworkClient {
     fn parse_body(body: String) -> BTreeMap<String, NetworkInterface> {
         let if_re = Regex::new(r" *(?P<name>[a-z0-9]+): *(?P<rx_bytes>[0-9]+) +(?P<rx_packets>[0-9]+) +(?P<rx_errs>[0-9]+) +(?P<rx_drop>[0-9]+) +(?P<rx_fifo>[0-9]+) +(?P<rx_frame>[0-9]+) +(?P<rx_compressed>[0-9]+) +(?P<rx_multicast>[0-9]+) +(?P<tx_bytes>[0-9]+) +(?P<tx_packets>[0-9]+) +(?P<tx_errs>[0-9]+) +(?P<tx_drop>[0-9]+) +(?P<tx_fifo>[0-9]+) +(?P<tx_colls>[0-9]+) +(?P<tx_carrier>[0-9]+) +(?P<tx_compressed>[0-9]+)").unwrap();
         if_re
-            .captures_iter(body.as_str())
+            .captures_iter(body.as_str().trim())
             .map(|capture| {
                 let name = capture.name("name").unwrap().as_str().to_string();
                 (

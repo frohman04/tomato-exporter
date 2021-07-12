@@ -24,7 +24,7 @@ impl LoadClient {
     async fn get_time(&self) -> Result<LoadInfo, reqwest::Error> {
         let body = self
             .client
-            .run_command("date +%s && cat /proc/loadavg".to_string())
+            .run_command("cat /proc/loadavg".to_string())
             .await?;
         Ok(LoadClient::parse_body(body))
     }
@@ -52,7 +52,7 @@ impl LoadClient {
             Regex::new(r"(?P<load_1m>[0-9]+.[0-9]+) (?P<load_5m>[0-9]+.[0-9]+) (?P<load_15m>[0-9]+.[0-9]+) (?P<running>[0-9]+)/(?P<total_procs>[0-9]+) (?P<last_pid>[0-9]+)")
                 .unwrap();
         body_parser_re
-            .captures(body.as_str())
+            .captures(body.as_str().trim())
             .map(|capture| LoadInfo {
                 load_1m: LoadClient::parse_cap_f32(&capture, "load_1m"),
                 load_5m: LoadClient::parse_cap_f32(&capture, "load_5m"),

@@ -26,7 +26,7 @@ impl MemClient {
     fn parse_body(body: String) -> BTreeMap<String, u64> {
         let mem_re = Regex::new(r"(?P<name>[^:\n]+):\s+(?P<val_kB>[0-9]+) kB").unwrap();
         mem_re
-            .captures_iter(body.as_str())
+            .captures_iter(body.as_str().trim())
             .map(|capture| {
                 (
                     capture.name("name").unwrap().as_str().to_string(),
