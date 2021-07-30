@@ -1784,6 +1784,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "time"
+version = "0.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6cf2535c6456e772ad756a0854ec907ede55d73d0b5a34855d808cb2d2f0942e"
+dependencies = [
+ "libc",
+]
+
+[[package]]
 name = "time-macros"
 version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1885,7 +1894,7 @@ dependencies = [
  "serde",
  "serde_yaml",
  "simplelog",
- "time 0.2.27",
+ "time 0.3.0",
  "url",
 ]
 
