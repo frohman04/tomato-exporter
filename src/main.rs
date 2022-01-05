@@ -44,8 +44,8 @@ async fn main() -> std::io::Result<()> {
         .version(crate_version!())
         .author("Chris Lieb")
         .arg(
-            clap::Arg::with_name("conf")
-                .short("c")
+            clap::Arg::new("conf")
+                .short('c')
                 .long("conf")
                 .default_value("conf.yaml"),
         )

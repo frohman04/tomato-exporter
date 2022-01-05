@@ -9,7 +9,7 @@ edition = "2021"
 actix-rt = "~1.1"
 actix-web = "~3.3"
 async-trait = "~0.1.52"
-clap = "~3.0.1"
+clap = { version = "~3.0", features = [ "cargo" ] }
 dyn-clone = "~1.0.4"
 futures = "~0.3.19"
 log = "~0.4"
