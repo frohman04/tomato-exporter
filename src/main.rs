@@ -40,7 +40,7 @@ async fn main() -> std::io::Result<()> {
     )])
     .unwrap();
 
-    let matches = clap::App::new("tomato_exporter")
+    let matches = clap::Command::new("tomato_exporter")
         .version(crate_version!())
         .author("Chris Lieb")
         .arg(
