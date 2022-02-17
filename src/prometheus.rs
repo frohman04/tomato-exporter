@@ -91,9 +91,9 @@ impl PromSample {
                 .map(|label| label.to_prom())
                 .collect::<Vec<String>>()
                 .join(","),
-            self.value.to_string(),
+            self.value,
             self.timestamp
-                .map_or_else(|| "".to_string(), |ts| format!(" {}", ts.to_string()))
+                .map_or_else(|| "".to_string(), |ts| format!(" {}", ts))
         )
     }
 }
