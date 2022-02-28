@@ -34,8 +34,8 @@ impl MemClient {
                         .unwrap()
                         .as_str()
                         .to_string()
-                        .replace("(", "_")
-                        .replace(")", ""),
+                        .replace('(', "_")
+                        .replace(')', ""),
                     capture
                         .name("val_kB")
                         .unwrap()

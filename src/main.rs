@@ -73,7 +73,7 @@ async fn main() -> std::io::Result<()> {
         App::new()
             .wrap(Logger::default())
             .wrap(Compress::default())
-            .data(WebState::new(client.clone()))
+            .app_data(WebState::new(client.clone()))
             .route(path.as_str(), a_web::get().to(metrics))
     })
     .bind(format!("{}:{}", conf.ip, conf.port))?
