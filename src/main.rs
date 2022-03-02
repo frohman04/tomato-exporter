@@ -23,6 +23,7 @@ mod web;
 
 use actix_web::middleware::{Compress, Logger};
 use actix_web::{web as a_web, App, HttpServer};
+use actix_web::web::Data;
 use clap::{crate_name, crate_version};
 use simplelog::{ColorChoice, CombinedLogger, Config, LevelFilter, TermLogger, TerminalMode};
 
@@ -73,7 +74,7 @@ async fn main() -> std::io::Result<()> {
         App::new()
             .wrap(Logger::default())
             .wrap(Compress::default())
-            .app_data(WebState::new(client.clone()))
+            .app_data(Data::new(WebState::new(client.clone())))
             .route(path.as_str(), a_web::get().to(metrics))
     })
     .bind(format!("{}:{}", conf.ip, conf.port))?
