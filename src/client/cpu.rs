@@ -84,7 +84,7 @@ impl CpuClient {
             "Seconds the cpus spent in each mode",
             PromMetricType::Counter,
             cpus.into_iter()
-                .map(|(i, cpu)| {
+                .flat_map(|(i, cpu)| {
                     vec![
                         PromSample::new(
                             vec![
@@ -162,7 +162,6 @@ impl CpuClient {
                     }))
                     .collect::<Vec<PromSample>>()
                 })
-                .flatten()
                 .collect(),
         )]
     }

@@ -158,7 +158,7 @@ impl TomatoClientInternal {
         endpoint: String,
         args: Option<HashMap<String, String>>,
     ) -> Result<String, reqwest::Error> {
-        let arg_map = args.unwrap_or_else(HashMap::new);
+        let arg_map = args.unwrap_or_default();
         let body = arg_map
             .into_iter()
             .fold(
