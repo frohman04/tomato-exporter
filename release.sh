@@ -9,7 +9,6 @@ export PATH=/c/SysGCC/raspberry/bin:/c/SysGCC/raspberry/arm-linux-gnueabihf/bin:
 set -x
 
 cargo test
-cargo run
 cargo build --release --target armv7-unknown-linux-gnueabihf
 scp conf.yaml target/armv7-unknown-linux-gnueabihf/release/tomato-exporter gilneas:~
 ssh gilneas -- "chmod +x ~/tomato-exporter && sudo mv ~/tomato-exporter /usr/local/bin/tomato_exporter && sudo mv ~/conf.yaml /etc/tomato-exporter/conf.yaml && sudo systemctl restart tomato_exporter"

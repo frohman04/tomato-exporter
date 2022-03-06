@@ -31,7 +31,7 @@ use web::{metrics, WebState};
 
 use client::TomatoClient;
 
-#[actix_rt::main]
+#[actix_web::main]
 async fn main() -> std::io::Result<()> {
     CombinedLogger::init(vec![TermLogger::new(
         LevelFilter::Info,
