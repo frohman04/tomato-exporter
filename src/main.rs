@@ -5,6 +5,7 @@ extern crate actix_web;
 extern crate async_trait;
 extern crate clap;
 extern crate dyn_clone;
+extern crate env_logger;
 extern crate futures;
 #[macro_use]
 extern crate log;
@@ -13,7 +14,6 @@ extern crate maplit;
 extern crate regex;
 extern crate reqwest;
 extern crate serde_yaml;
-extern crate simplelog;
 extern crate url;
 
 mod client;
@@ -25,7 +25,7 @@ use actix_web::middleware::{Compress, Logger};
 use actix_web::{web as a_web, App, HttpServer};
 use actix_web::web::Data;
 use clap::{crate_name, crate_version};
-use simplelog::{ColorChoice, CombinedLogger, Config, LevelFilter, TermLogger, TerminalMode};
+use env_logger::Env;
 
 use web::{metrics, WebState};
 
@@ -33,13 +33,9 @@ use client::TomatoClient;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    CombinedLogger::init(vec![TermLogger::new(
-        LevelFilter::Info,
-        Config::default(),
-        TerminalMode::Stderr,
-        ColorChoice::Auto,
-    )])
-    .unwrap();
+    let env = Env::default()
+        .filter_or("MY_LOG_LEVEL", "info");
+    env_logger::init_from_env(env);
 
     let matches = clap::Command::new("tomato_exporter")
         .version(crate_version!())
