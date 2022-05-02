@@ -178,7 +178,7 @@ impl TomatoClientInternal {
             .body(body)
             .send()
             .await?;
-        Ok(response.text().await?)
+        response.text().await
     }
 
     async fn run_command(&self, command: String) -> Result<String, reqwest::Error> {
