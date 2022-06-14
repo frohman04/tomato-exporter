@@ -22,8 +22,8 @@ mod prometheus;
 mod web;
 
 use actix_web::middleware::{Compress, Logger};
-use actix_web::{web as a_web, App, HttpServer};
 use actix_web::web::Data;
+use actix_web::{web as a_web, App, HttpServer};
 use clap::{crate_name, crate_version};
 use env_logger::Env;
 
@@ -33,8 +33,7 @@ use client::TomatoClient;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    let env = Env::default()
-        .filter_or("MY_LOG_LEVEL", "info");
+    let env = Env::default().filter_or("MY_LOG_LEVEL", "info");
     env_logger::init_from_env(env);
 
     let matches = clap::Command::new("tomato_exporter")
@@ -48,7 +47,7 @@ async fn main() -> std::io::Result<()> {
         )
         .get_matches();
 
-    let conf = config::load_conf(matches.value_of("conf").unwrap().to_string());
+    let conf = config::load_conf(matches.get_one::<String>("conf").unwrap().clone());
     info!(
         "Starting {} v{}: http://{}:{}/{}",
         crate_name!(),
