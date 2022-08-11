@@ -8,7 +8,7 @@ pub fn load_conf(path: String) -> Config {
     conf
 }
 
-#[derive(Debug, PartialEq, Deserialize)]
+#[derive(Debug, Eq, PartialEq, Deserialize)]
 pub struct Config {
     pub ip: String,
     pub port: u16,
