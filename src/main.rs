@@ -1,19 +1,21 @@
 #![forbid(unsafe_code)]
 
 extern crate actix_web;
+extern crate ansi_term;
 #[macro_use]
 extern crate async_trait;
 extern crate clap;
 extern crate dyn_clone;
-extern crate env_logger;
 extern crate futures;
-#[macro_use]
-extern crate log;
 #[macro_use]
 extern crate maplit;
 extern crate regex;
 extern crate reqwest;
 extern crate serde_yaml;
+extern crate tracing;
+extern crate tracing_actix_web;
+extern crate tracing_log;
+extern crate tracing_subscriber;
 extern crate url;
 
 mod client;
@@ -25,7 +27,10 @@ use actix_web::middleware::{Compress, Logger};
 use actix_web::web::Data;
 use actix_web::{web as a_web, App, HttpServer};
 use clap::{crate_name, crate_version};
-use env_logger::Env;
+use tracing::{info, Level};
+use tracing_actix_web::TracingLogger;
+use tracing_log::LogTracer;
+use tracing_subscriber::FmtSubscriber;
 
 use web::{metrics, WebState};
 
@@ -33,8 +38,14 @@ use client::TomatoClient;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    let env = Env::default().filter_or("MY_LOG_LEVEL", "info");
-    env_logger::init_from_env(env);
+    let ansi_enabled = fix_ansi_term();
+    LogTracer::init().expect("routing log to tracing failed");
+
+    let subscriber = FmtSubscriber::builder()
+        .with_max_level(Level::INFO)
+        .with_ansi(ansi_enabled)
+        .finish();
+    tracing::subscriber::set_global_default(subscriber).expect("setting default subscriber failed");
 
     let matches = clap::Command::new("tomato_exporter")
         .version(crate_version!())
@@ -67,6 +78,7 @@ async fn main() -> std::io::Result<()> {
     let path = format!("/{}", conf.slug.clone());
     HttpServer::new(move || {
         App::new()
+            .wrap(TracingLogger::default())
             .wrap(Logger::default())
             .wrap(Compress::default())
             .app_data(Data::new(WebState::new(client.clone())))
@@ -75,4 +87,14 @@ async fn main() -> std::io::Result<()> {
     .bind(format!("{}:{}", conf.ip, conf.port))?
     .run()
     .await
+}
+
+#[cfg(target_os = "windows")]
+fn fix_ansi_term() -> bool {
+    ansi_term::enable_ansi_support().map_or(false, |()| true)
+}
+
+#[cfg(not(target_os = "windows"))]
+fn fix_ansi_term() -> bool {
+    true
 }

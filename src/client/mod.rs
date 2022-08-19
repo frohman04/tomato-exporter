@@ -6,11 +6,13 @@ mod time;
 mod uname;
 
 use std::collections::HashMap;
+use std::fmt::Formatter;
 
 use ::time::OffsetDateTime;
 use dyn_clone::DynClone;
 use futures::future::join_all;
 use reqwest::{Client, ClientBuilder};
+use tracing::{info, trace, trace_span, warn};
 use url::form_urlencoded;
 
 use crate::client::cpu::CpuClient;
@@ -26,6 +28,12 @@ trait Scraper: DynClone + Send {
     async fn get_metrics(&self) -> Result<Vec<PromMetric>, reqwest::Error>;
 
     fn get_name(&self) -> String;
+}
+
+impl std::fmt::Debug for dyn Scraper {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.write_str(self.get_name().as_str())
+    }
 }
 
 dyn_clone::clone_trait_object!(Scraper);
@@ -113,10 +121,14 @@ impl TomatoClient {
     }
 
     async fn run_scraper(scraper: &dyn Scraper) -> ScraperResult {
+        let span = trace_span!("Run scraper");
+        let _guard = span.enter();
+
         let start_time = OffsetDateTime::now_utc();
         let result = scraper.get_metrics().await;
         let end_time = OffsetDateTime::now_utc();
         let duration = (end_time - start_time).as_seconds_f64();
+        trace!(scraper = scraper.get_name(), duration);
         ScraperResult {
             name: scraper.get_name(),
             duration,
