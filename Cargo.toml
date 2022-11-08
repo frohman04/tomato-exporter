@@ -12,7 +12,7 @@ clap = { version = "~4.0", features = [ "cargo" ] }
 dyn-clone = "~1.0.9"
 futures = "~0.3.25"
 maplit = "~1.0"
-regex = "~1.6"
+regex = "~1.7"
 reqwest = { version = "~0.11", features = [ "rustls-tls" ], default-features = false }
 serde = { version = "~1.0", features = [ "derive" ] }
 serde_yaml = "~0.9"
