@@ -7,7 +7,7 @@ edition = "2021"
 
 [dependencies]
 actix-web = "~4.2.1"
-async-trait = "~0.1.58"
+async-trait = "~0.1.59"
 clap = { version = "~4.0", features = [ "cargo" ] }
 dyn-clone = "~1.0.9"
 futures = "~0.3.25"
