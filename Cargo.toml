@@ -24,4 +24,4 @@ tracing-subscriber = "~0.3.16"
 url = "~2.3.1"
 
 [target.'cfg(windows)'.dependencies]
-nu-ansi-term = "~0.46.0"
+nu-ansi-term = "~0.47.0"
