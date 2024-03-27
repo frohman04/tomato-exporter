@@ -10,7 +10,7 @@ extern crate futures;
 extern crate maplit;
 extern crate regex;
 extern crate reqwest;
-extern crate serde_yaml;
+extern crate serde_json;
 extern crate tracing;
 extern crate tracing_actix_web;
 extern crate tracing_log;
