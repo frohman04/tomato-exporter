@@ -3,7 +3,7 @@
 set -e
 set -x
 
-cargo test
+cargo nextest run
 if [ -z ${OS+x} ]; then
     BUILD=build
 else
