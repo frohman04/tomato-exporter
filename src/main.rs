@@ -24,14 +24,14 @@ mod web;
 
 use actix_web::middleware::{Compress, Logger};
 use actix_web::web::Data;
-use actix_web::{web as a_web, App, HttpServer};
+use actix_web::{App, HttpServer, web as a_web};
 use clap::{crate_name, crate_version};
-use tracing::{info, Level};
+use tracing::{Level, info};
 use tracing_actix_web::TracingLogger;
 use tracing_log::LogTracer;
 use tracing_subscriber::FmtSubscriber;
 
-use web::{metrics, WebState};
+use web::{WebState, metrics};
 
 use client::TomatoClient;
 
